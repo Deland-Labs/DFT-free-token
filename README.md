@@ -1,4 +1,4 @@
-# ex3
+# DFT-free-token
 
 ## Development
 
