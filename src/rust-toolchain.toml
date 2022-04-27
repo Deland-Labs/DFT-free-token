@@ -1,0 +1,11 @@
+[toolchain]
+channel = "nightly"
+components = [
+    "rustc",
+    "rust-std",
+    "rustfmt",
+    "clippy",
+    "llvm-tools-preview",
+]
+targets = ["wasm32-unknown-unknown"]
+profile = "minimal"

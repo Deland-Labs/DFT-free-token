@@ -1,0 +1,35 @@
+name: reinstall tokens to test-net
+
+on:
+  push:
+    branches:
+      - feature/reinstall_tokens
+  workflow_dispatch:
+    
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+    container: 
+      image: docker.io/kentsday/dfx_rust:bullseye
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: set pipenv and dfx
+        run: |
+          cd $GITHUB_WORKSPACE/src/tokens_test_net
+          pipenv install
+          dfx start --host 0.0.0.0:8000 --background
+
+      - name: update identity
+        run: |
+          cd $GITHUB_WORKSPACE/src/tokens_test_net
+          pipenv run invoke update-identity --identity-file ${{ secrets.IDENTITY_FILE_TEST_NET }} --pem-file-path /github/home/.config/dfx/identity/default/identity.pem
+
+      - name: canister reinstall
+        run: |
+          cd $GITHUB_WORKSPACE/src/tokens_test_net
+          pipenv run invoke reinstall-test-net

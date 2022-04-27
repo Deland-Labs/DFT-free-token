@@ -1,0 +1,558 @@
+[
+  {
+    "description": "Description: The purpose of this feature is to test the Background keyword",
+    "elements": [
+      {
+        "description": "",
+        "id": "test-background-feature;search-a-product-and-add-the-first-product-to-the-user-basket",
+        "keyword": "Scenario",
+        "line": 14,
+        "name": "Search a product and add the first product to the User basket",
+        "steps": [
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 10,
+            "name": "I navigate to the login page",
+            "match": {
+              "location": "scripts/features/stepDefinitions/loginStep.ts:12"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 1000000
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "When ",
+            "line": 11,
+            "name": "I submit username and password",
+            "match": {
+              "location": "scripts/features/stepDefinitions/loginStep.ts:16"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 12,
+            "name": "I should be logged in",
+            "match": {
+              "location": "scripts/features/stepDefinitions/loginStep.ts:20"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 0
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 15,
+            "name": "User search for Lenovo Laptop",
+            "result": {
+              "status": "undefined",
+              "duration": 0
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "When ",
+            "line": 16,
+            "name": "Add the first laptop that appears in the search result to the basket",
+            "result": {
+              "status": "undefined",
+              "duration": 0
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 17,
+            "name": "User basket should display with added item",
+            "result": {
+              "status": "undefined",
+              "duration": 0
+            }
+          }
+        ],
+        "tags": [],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "test-background-feature;navigate-to-a-product-and-add-the-same-to-the-user-basket",
+        "keyword": "Scenario",
+        "line": 19,
+        "name": "Navigate to a product and add the same to the User basket",
+        "steps": [
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 10,
+            "name": "I navigate to the login page",
+            "match": {
+              "location": "scripts/features/stepDefinitions/loginStep.ts:12"
+            },
+            "result": {
+              "status": "skipped",
+              "duration": 0
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "When ",
+            "line": 11,
+            "name": "I submit username and password",
+            "match": {
+              "location": "scripts/features/stepDefinitions/loginStep.ts:16"
+            },
+            "result": {
+              "status": "skipped",
+              "duration": 0
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 12,
+            "name": "I should be logged in",
+            "match": {
+              "location": "scripts/features/stepDefinitions/loginStep.ts:20"
+            },
+            "result": {
+              "status": "skipped",
+              "duration": 0
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 20,
+            "name": "User navigate for Lenovo Laptop",
+            "result": {
+              "status": "undefined",
+              "duration": 0
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "When ",
+            "line": 21,
+            "name": "Add the laptop to the basket",
+            "result": {
+              "status": "undefined",
+              "duration": 0
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 22,
+            "name": "User basket should display with added item",
+            "result": {
+              "status": "undefined",
+              "duration": 0
+            }
+          }
+        ],
+        "tags": [],
+        "type": "scenario"
+      }
+    ],
+    "id": "test-background-feature",
+    "line": 1,
+    "keyword": "Feature",
+    "name": "Test Background Feature",
+    "tags": [],
+    "uri": "scripts/features/login.feature"
+  },
+  {
+    "description": "",
+    "elements": [
+      {
+        "description": "",
+        "id": "token-transfer;transfer-token-to-a-receiver",
+        "keyword": "Scenario Outline",
+        "line": 17,
+        "name": "Transfer token to a receiver",
+        "steps": [
+          {
+            "arguments": [
+              {
+                "rows": [
+                  {
+                    "cells": [
+                      "key",
+                      "name",
+                      "symbol",
+                      "decimals",
+                      "total_supply",
+                      "fee_minimum",
+                      "fee_rate",
+                      "rate_decimals",
+                      "owner"
+                    ]
+                  },
+                  {
+                    "cells": [
+                      "token_WICP",
+                      "Test Token 1",
+                      "TST1",
+                      "18",
+                      "100000000",
+                      "0.01",
+                      "0",
+                      "8",
+                      "dft_main"
+                    ]
+                  },
+                  {
+                    "cells": [
+                      "token_WICP2",
+                      "Test Token 2",
+                      "TST2",
+                      "8",
+                      "100000000",
+                      "0.001",
+                      "0.0001",
+                      "4",
+                      "dft_main"
+                    ]
+                  },
+                  {
+                    "cells": [
+                      "fusion",
+                      "Test Token 3",
+                      "TST3",
+                      "16",
+                      "100000000",
+                      "0.2",
+                      "0.02",
+                      "6",
+                      "dft_main"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "keyword": "Given ",
+            "line": 5,
+            "name": "Reinstall dft canisters",
+            "result": {
+              "status": "undefined",
+              "duration": 0
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "When ",
+            "line": 18,
+            "name": "dft_miner transfer 100 token_WICP to dft_receiver immediate",
+            "result": {
+              "status": "undefined",
+              "duration": 0
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 19,
+            "name": "Check the token_WICP balance of dft_miner should be 99899.99",
+            "result": {
+              "status": "undefined",
+              "duration": 0
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 20,
+            "name": "Check the token_WICP balance of dft_receiver should be 100",
+            "result": {
+              "status": "undefined",
+              "duration": 0
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 21,
+            "name": "Check that the transfer fees of token_WICP by 100 charged fee is 0.02,fee to is dft_fee_charger",
+            "result": {
+              "status": "undefined",
+              "duration": 0
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@dft",
+            "line": 1
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "token-transfer;transfer-token-to-a-receiver",
+        "keyword": "Scenario Outline",
+        "line": 17,
+        "name": "Transfer token to a receiver",
+        "steps": [
+          {
+            "arguments": [
+              {
+                "rows": [
+                  {
+                    "cells": [
+                      "key",
+                      "name",
+                      "symbol",
+                      "decimals",
+                      "total_supply",
+                      "fee_minimum",
+                      "fee_rate",
+                      "rate_decimals",
+                      "owner"
+                    ]
+                  },
+                  {
+                    "cells": [
+                      "token_WICP",
+                      "Test Token 1",
+                      "TST1",
+                      "18",
+                      "100000000",
+                      "0.01",
+                      "0",
+                      "8",
+                      "dft_main"
+                    ]
+                  },
+                  {
+                    "cells": [
+                      "token_WICP2",
+                      "Test Token 2",
+                      "TST2",
+                      "8",
+                      "100000000",
+                      "0.001",
+                      "0.0001",
+                      "4",
+                      "dft_main"
+                    ]
+                  },
+                  {
+                    "cells": [
+                      "fusion",
+                      "Test Token 3",
+                      "TST3",
+                      "16",
+                      "100000000",
+                      "0.2",
+                      "0.02",
+                      "6",
+                      "dft_main"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "keyword": "Given ",
+            "line": 5,
+            "name": "Reinstall dft canisters",
+            "result": {
+              "status": "undefined",
+              "duration": 0
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "When ",
+            "line": 18,
+            "name": "dft_user1 transfer 100 token_WICP2 to dft_receiver immediate",
+            "result": {
+              "status": "undefined",
+              "duration": 0
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 19,
+            "name": "Check the token_WICP2 balance of dft_user1 should be 99899.99",
+            "result": {
+              "status": "undefined",
+              "duration": 0
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 20,
+            "name": "Check the token_WICP2 balance of dft_receiver should be 100",
+            "result": {
+              "status": "undefined",
+              "duration": 0
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 21,
+            "name": "Check that the transfer fees of token_WICP2 by 100 charged fee is 10.01,fee to is dft_fee_charger",
+            "result": {
+              "status": "undefined",
+              "duration": 0
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@dft",
+            "line": 1
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "token-transfer;transfer-token-to-a-receiver",
+        "keyword": "Scenario Outline",
+        "line": 17,
+        "name": "Transfer token to a receiver",
+        "steps": [
+          {
+            "arguments": [
+              {
+                "rows": [
+                  {
+                    "cells": [
+                      "key",
+                      "name",
+                      "symbol",
+                      "decimals",
+                      "total_supply",
+                      "fee_minimum",
+                      "fee_rate",
+                      "rate_decimals",
+                      "owner"
+                    ]
+                  },
+                  {
+                    "cells": [
+                      "token_WICP",
+                      "Test Token 1",
+                      "TST1",
+                      "18",
+                      "100000000",
+                      "0.01",
+                      "0",
+                      "8",
+                      "dft_main"
+                    ]
+                  },
+                  {
+                    "cells": [
+                      "token_WICP2",
+                      "Test Token 2",
+                      "TST2",
+                      "8",
+                      "100000000",
+                      "0.001",
+                      "0.0001",
+                      "4",
+                      "dft_main"
+                    ]
+                  },
+                  {
+                    "cells": [
+                      "fusion",
+                      "Test Token 3",
+                      "TST3",
+                      "16",
+                      "100000000",
+                      "0.2",
+                      "0.02",
+                      "6",
+                      "dft_main"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "keyword": "Given ",
+            "line": 5,
+            "name": "Reinstall dft canisters",
+            "result": {
+              "status": "undefined",
+              "duration": 0
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "When ",
+            "line": 18,
+            "name": "dft_user2 transfer 100 fusion to dft_receiver immediate",
+            "result": {
+              "status": "undefined",
+              "duration": 0
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 19,
+            "name": "Check the fusion balance of dft_user2 should be 99898",
+            "result": {
+              "status": "undefined",
+              "duration": 0
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 20,
+            "name": "Check the fusion balance of dft_receiver should be 100",
+            "result": {
+              "status": "undefined",
+              "duration": 0
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 21,
+            "name": "Check that the transfer fees of fusion by 100 charged fee is 2002.00,fee to is dft_fee_charger",
+            "result": {
+              "status": "undefined",
+              "duration": 0
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@dft",
+            "line": 1
+          }
+        ],
+        "type": "scenario"
+      }
+    ],
+    "id": "token-transfer",
+    "line": 2,
+    "keyword": "Feature",
+    "name": "Token Transfer",
+    "tags": [
+      {
+        "name": "@dft",
+        "line": 1
+      }
+    ],
+    "uri": "scripts/features/tokenTransfer.feature"
+  }
+]

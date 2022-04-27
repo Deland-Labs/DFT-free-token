@@ -1,0 +1,36 @@
+{
+  "canisters": {
+    "free_token": {
+      "type": "rust",
+      "package": "free_token",
+      "candid": "canisters/free_token/src/free_token.did"
+    },
+    "token_WICP": {
+      "candid": "tokens/package/assets/dft_basic.did",
+      "wasm": "tokens/package/assets/dft_basic.wasm",
+      "type": "custom"
+    },
+    "token_WUSD": {
+      "candid": "tokens/package/assets/dft_basic.did",
+      "wasm": "tokens/package/assets/dft_basic.wasm",
+      "type": "custom"
+    },
+    "token_mintable": {
+      "candid": "tokens/package/assets/dft_mintable.did",
+      "wasm": "tokens/package/assets/dft_mintable.wasm",
+      "type": "custom"
+    }
+  },
+  "defaults": {
+    "build": {
+      "packtool": ""
+    }
+  },
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:8000",
+      "type": "ephemeral"
+    }
+  },
+  "version": 1
+}
