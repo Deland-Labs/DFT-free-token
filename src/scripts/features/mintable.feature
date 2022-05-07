@@ -7,7 +7,6 @@ Feature: Mintable
       | token_WICP     | W ICP    | WICP     | 0        | 10^9         | dft_main |
       | token_WUSD     | W USD    | WUSD     | 0        | 10^9         | dft_main |
       | token_mintable | mintable | mintable | 0        | 10^9         | dft_main |
-    And Reinstall ex3 canisters
     And transfer token from "dft_main" to these users
       | token      | user      | amount |
       | token_WICP | dft_user1 | 10^8   |
@@ -39,4 +38,3 @@ Feature: Mintable
       | dft_user2 | 998    |
 
 
-  Scenario:

@@ -6,7 +6,6 @@ import {parseToOrigin} from "~/utils/uint";
 import {
     createWICPActor,
     createWUSDActor,
-    createFusionActor,
 } from "~/declarations";
 import {parseRawTableToJsonArray} from "~/utils/convert";
 import {identityFactory} from "~/utils/identity";
