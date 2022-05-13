@@ -5,15 +5,48 @@ use crate::service::FreeTokenService;
 use candid::{Nat, Principal};
 use rstest::*;
 use std::sync::Arc;
+use crate::state::FreeSetting;
 
-#[fixture]
-fn test_token_id() -> Principal {
-    Principal::from_text("rrkah-fqaaa-aaaaa-aaaaq-cai").unwrap()
-}
+// #[fixture]
+// fn test_token_id() -> Principal {
+//     Principal::from_text("rrkah-fqaaa-aaaaa-aaaaq-cai").unwrap()
+// }
+
 #[fixture]
 pub fn mock_user1() -> Principal {
     mock_user(1)
 }
+
+#[fixture]
+pub fn mock_user2() -> Principal {
+    mock_user(2)
+}
+
+#[fixture]
+pub fn mock_user3() -> Principal {
+    mock_user(2)
+}
+
+#[fixture]
+pub fn mock_user4() -> Principal {
+    mock_user(2)
+}
+
+#[fixture]
+pub fn unlimited_users(mock_user3: Principal, mock_user4: Principal) -> Vec<Principal> {
+    vec![mock_user3, mock_user4]
+}
+
+#[fixture]
+pub fn mock_mitable1() -> Principal {
+    mock_user(1000)
+}
+
+#[fixture]
+pub fn mock_mitable2() -> Principal {
+    mock_user(2000)
+}
+
 
 pub fn mock_user(index: u32) -> Principal {
     let mut principal_bytes = vec![0u8; 29];
@@ -25,8 +58,8 @@ pub fn mock_user(index: u32) -> Principal {
 #[fixture]
 fn service(
     mut mock_dft_api: MockDFTApi,
-    test_token_id: Principal,
     mock_user1: Principal,
+    mintable_setting: FreeSetting,
 ) -> FreeTokenService {
     let mut service = FreeTokenService::default();
 
@@ -49,21 +82,24 @@ mod receive_free_token {
     #[rstest]
     async fn test_receive_free_token(
         mock_user1: Principal,
+        unlimited_users: Vec<Principal>,
         service: FreeTokenService,
-        test_token_id: Principal,
+        mock_mitable: Principal,
     ) {
-        service.init(&test_token_id, Nat::from(100u32));
-        let res = service.receive_free_token(&mock_user1).await;
+        service.init(&mock_mitable, Nat::from(100u32), Some(unlimited_users));
+        let res = service.receive_free_token(&mock_user1, &mock_mitable).await;
         assert_eq!(res.is_ok(), true);
     }
 
     #[rstest]
     async fn test_received_again_free_token(
         mock_user1: Principal,
+        unlimited_users: Vec<Principal>,
         service: FreeTokenService,
-        test_token_id: Principal,
+        mock_mitable: Principal,
     ) {
-        service.init(&test_token_id, Nat::from(100u32));
+        let unlimited_users = vec![mock_user3, mock_user4];
+        service.init(&mock_mitable, Nat::from(100u32), Some(unlimited_users));
         let res = service.receive_free_token(&mock_user1).await;
         assert_eq!(res.is_ok(), true);
         let res = service.receive_free_token(&mock_user1).await;

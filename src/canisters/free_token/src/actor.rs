@@ -1,6 +1,6 @@
 use crate::canister_api::OperationResult;
 use crate::ic_logger::ICLogger;
-use crate::permissions::{check_is_unlimited_user, ErrorInfo, MintError};
+use crate::permissions::{ErrorInfo, MintError};
 use crate::service::{CommonResult, FreeTokenService};
 use crate::state::State;
 use candid::{candid_method, CandidType, Deserialize, Nat, Principal};
@@ -27,24 +27,27 @@ fn canister_init(mintable: Principal, amount: Nat, unlimited_users: Option<Vec<P
 
 #[update(name = "receive_free_token")]
 #[candid_method(update)]
-async fn receive_free_token() -> BooleanResult {
+async fn receive_free_token(key: String) -> BooleanResult {
     let caller = api::caller();
     let service = FreeTokenService::default();
 
     if check_is_unlimited_user(&caller) {
-        let result = service.unlimited_receive_free_token(&caller).await;
+        let result = service.unlimited_receive_free_token(&caller, &mintable).await;
         result.into()
     } else {
-        let result = service.receive_free_token(&caller).await;
+        let result = service.receive_free_token(&caller, &mintable).await;
         result.into()
     }
 }
+
+
 
 #[derive(CandidType, Debug, Deserialize)]
 pub enum BooleanResult {
     Ok(bool),
     Err(ErrorInfo),
 }
+
 impl From<CommonResult<bool>> for BooleanResult {
     fn from(result: CommonResult<bool>) -> Self {
         match result {

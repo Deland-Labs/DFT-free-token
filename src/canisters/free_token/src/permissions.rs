@@ -1,33 +1,18 @@
-use crate::state::STATE;
+use crate::state::{STATE, User};
 use candid::{CandidType, Deserialize, Principal};
 use std::borrow::Borrow;
 use thiserror::Error;
 
-pub fn must_not_have_received(caller: &Principal) -> Result<(), MintError> {
-    STATE.with(|state| {
-        if state.borrow().free_records.borrow().get(caller).is_some() {
-            Err(MintError::AlreadyReceived)
-        } else {
-            Ok(())
-        }
-    })
-}
-pub fn check_is_unlimited_user(caller: &Principal) -> bool {
-    STATE.with(|state| {
-        if state.borrow().unlimited_users.borrow().contains(caller) {
-            true
-        } else {
-            false
-        }
-    })
-}
 
-pub fn must_not_anonymous(caller: &Principal) -> DexServiceResult<()> {
+pub fn must_not_anonymous(caller: &Principal) -> DexServiceResult<User> {
     if *caller == Principal::anonymous() {
         return Err(MintError::Unauthorized);
     }
-    Ok(())
+    Ok(User(caller.clone()))
 }
+
+
+pub type ICNSActorResult<T> = Result<T, ErrorInfo>;
 
 #[derive(Debug, Clone, Ord, PartialOrd, Eq, PartialEq, CandidType, Deserialize, Error)]
 pub enum MintError {
@@ -43,7 +28,13 @@ pub enum MintError {
     #[error("Unauthorized, please login first")]
     Unauthorized,
     #[error("Already received, can not receive again")]
-    AlreadyReceived,
+    RewardAlreadyReceived,
+    #[error("Unknown mintable")]
+    UnknownMintable,
+    #[error("Reward incomplete")]
+    RewardIncomplete,
+    #[error("Reward code not available")]
+    RewardCodeNotAvailable,
 }
 
 impl MintError {
@@ -52,11 +43,15 @@ impl MintError {
             MintError::Unknown => 1,
             MintError::RemoteError(_) => 2,
             MintError::Unauthorized => 3,
-            MintError::AlreadyReceived => 4,
-            MintError::CanisterCallError { .. } => 7,
+            MintError::RewardAlreadyReceived => 4,
+            MintError::CanisterCallError { .. } => 5,
+            MintError::UnknownMintable => 6,
+            MintError::RewardIncomplete => 7,
+            MintError::RewardCodeNotAvailable => 8,
         }
     }
 }
+
 pub fn get_error_code(error: MintError) -> ErrorInfo {
     ErrorInfo {
         code: error.code(),
