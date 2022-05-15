@@ -8,22 +8,25 @@ use crate::permissions::MintError;
 use crate::received_reward_store::{ReceivedRewardRecordStore, ReceivesRewardRecord, ReceivesRewardRecordState};
 use crate::reward_store::{RewardCode, RewardPackage, RewardStore};
 use crate::service::CommonResult;
+use crate::TimeInNs;
 thread_local! {
     pub static STATE: State = State::default();
 }
 
 
-pub struct TransactionId(String);
+pub struct TransactionId(pub String);
 
-pub struct User(Principal);
+#[derive(Debug, Clone, Eq, Hash, PartialEq)]
+pub struct User(pub Principal);
 
-impl from<Principal> for User {
+
+impl From<Principal> for User {
     fn from(principal: Principal) -> Self {
         User(principal)
     }
 }
 
-impl from<User> for Principal {
+impl From<User> for Principal {
     fn from(user: User) -> Self {
         user.0
     }
@@ -42,29 +45,38 @@ impl State {
     pub fn is_able_receive(&self, user: &User, reward_code: &RewardCode) -> CommonResult<()> {
         let state = self;
         let reward_store = state.reward_store.borrow();
-        if !reward_store.is_reward_available(code) {
+        if !reward_store.is_reward_available(reward_code) {
             return Err(MintError::RewardCodeNotAvailable).into();
         }
         let unlimited_user_store = state.unlimited_user_store.borrow();
         let received_reward_record_store = state.received_reward_record_store.borrow();
-        if received_reward_record_store.is_received_state_sending_exist(user.clone(), code.clone()) {
+        if received_reward_record_store.is_received_state_all_completed(user, reward_code) {
             return Err(MintError::RewardIncomplete).into();
         }
 
-        if received_reward_record_store.is_received_reward_record_exist(user.clone(), code.clone()) == true
-            || unlimited_user_store.is_unlimited_user(user.clone()) == false {
+        if received_reward_record_store.is_received_reward_record_exist(user, reward_code) == true
+            || unlimited_user_store.is_unlimited_user(user) == false {
             return Err(MintError::RewardAlreadyReceived).into();
         }
         Ok(())
     }
-    pub fn receive_reward(&self, user: &User, reward_code: &RewardCode, time: Option<u64>) -> CommonResult<&RewardPackage> {
+    pub fn receive_reward(&self, user: &User, reward_code: &RewardCode, time: TimeInNs) -> CommonResult<ReceivesRewardRecord> {
         let state = self;
         let mut received_reward_record_store = state.received_reward_record_store.borrow_mut();
         let reward_store = state.reward_store.borrow();
-        let reward_package = reward_store.get_reward(reward_code)?;
-        let reward_record = ReceivesRewardRecord::new(time.clone(), ReceivesRewardRecordState::Sending);
-        received_reward_record_store.add_received_reward_record(user.clone(), reward_code.clone(), &reward_record);
-        Ok(reward_package)
+        let reward_package = reward_store.get_reward(reward_code);
+        if reward_package.is_none() {
+            return Err(MintError::RewardCodeNotAvailable).into();
+        }
+
+        let mut reward_record_hash = HashMap::new();
+        for reward_type in reward_package.unwrap().reward_types().iter() {
+            reward_record_hash.insert(reward_type.clone(), ReceivesRewardRecordState::Sending);
+        }
+
+        let reward_record = ReceivesRewardRecord::new(reward_record_hash, time);
+        received_reward_record_store.add_received_reward_record(user.clone(), reward_code.clone(), reward_record.clone());
+        Ok(reward_record)
     }
 }
 
@@ -78,7 +90,7 @@ impl UnlimitedUserStore {
     pub fn add_unlimited_user(&mut self, user: User, reward_codes: Vec<RewardCode>) {
         self.unlimited_users
             .entry(user)
-            .or_insert_with(Vec::new())
+            .or_insert(Vec::new())
             .extend(reward_codes);
     }
     pub fn remove_unlimited_user(&mut self, user: User) {

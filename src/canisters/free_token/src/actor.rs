@@ -9,14 +9,16 @@ use ic_cdk_macros::*;
 use log::{debug, logger, LevelFilter};
 use std::panic;
 use yansi::Paint;
+use crate::reward_store::RewardCode;
+use crate::TimeInNs;
 
 #[init]
 #[candid_method(init)]
 #[allow(clippy::too_many_arguments)]
 #[allow(clippy::clone_on_copy)]
 fn canister_init(mintable: Principal, amount: Nat, unlimited_users: Option<Vec<Principal>>) {
-    let service = FreeTokenService::default();
-    service.init(&mintable, amount, unlimited_users);
+    // let service = FreeTokenService::default();
+    // service.init(&mintable, amount, unlimited_users);
     log::set_logger(&ICLogger);
     log::set_max_level(LevelFilter::Trace);
     panic::set_hook(Box::new(|data| {
@@ -29,17 +31,12 @@ fn canister_init(mintable: Principal, amount: Nat, unlimited_users: Option<Vec<P
 #[candid_method(update)]
 async fn receive_free_token(key: String) -> BooleanResult {
     let caller = api::caller();
+    let now = api::time();
     let service = FreeTokenService::default();
 
-    if check_is_unlimited_user(&caller) {
-        let result = service.unlimited_receive_free_token(&caller, &mintable).await;
-        result.into()
-    } else {
-        let result = service.receive_free_token(&caller, &mintable).await;
-        result.into()
-    }
+    let result = service.receive_free_token(&caller, &RewardCode(key), TimeInNs(now)).await;
+    result.into()
 }
-
 
 
 #[derive(CandidType, Debug, Deserialize)]

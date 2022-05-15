@@ -2,7 +2,8 @@ use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 use candid::{Nat, Principal, CandidType, Deserialize, Error};
 
-pub struct RewardCode(String);
+#[derive(Debug, Clone, Eq, Hash, PartialEq)]
+pub struct RewardCode(pub String);
 
 pub struct RewardPackage(Vec<RewardType>);
 
@@ -44,7 +45,7 @@ impl RewardStore {
     }
 }
 
-#[derive(Debug, Clone, Ord, PartialOrd, Eq, PartialEq, CandidType, Deserialize)]
+#[derive(Debug, Clone, Ord, PartialOrd, Eq, Hash, PartialEq, CandidType, Deserialize)]
 pub enum RewardType {
     QuotaRewardPackage {
         canister: Principal,
@@ -63,7 +64,7 @@ pub enum RewardType {
 
 
 /// Quota type to be used for registration
-#[derive(Deserialize, Copy, CandidType, Clone, Hash, Eq, PartialEq, Debug)]
+#[derive(Deserialize, Copy, CandidType, Clone, Hash, Eq, PartialEq, Debug, Ord, PartialOrd)]
 pub enum QuotaType {
     /// The length of name's the first part in chars must be equal to the value.
     /// e.g. LenEq(3) means that the first part of the name must be 3 chars long.

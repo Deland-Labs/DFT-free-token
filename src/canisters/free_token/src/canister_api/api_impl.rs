@@ -1,6 +1,7 @@
+use super::*;
 use candid::{Nat, Principal};
-use crate::canister_api::{BatchTransferRequest, call, call_canister_as_actor_result, call_canister_as_icns_result, IDFTApi, IICNamingApi, OperationResult, Subaccount, TransferFromQuotaRequest};
-use crate::permissions::{ActorResult, ErrorInfo, ICNSActorResult};
+use crate::canister_api::{BatchTransferRequest, call, call_canister_as_actor_result, IDFTApi, IICNamingApi, OperationResult, Subaccount, TransferFromQuotaRequest};
+use crate::permissions::{ActorResult, ErrorInfo};
 use crate::reward_store::QuotaType;
 
 pub struct ICNamingApi;
@@ -19,31 +20,31 @@ impl IICNamingApi for ICNamingApi {
         to: Principal,
         quota_type: QuotaType,
         diff: u32,
-    ) -> ICNSActorResult<bool> {
-        call_canister_as_icns_result(canister, "transfer_quota", (to, quota_type, diff)).await
+    ) -> ActorResult<bool> {
+        call_canister_as_actor_result(canister, "transfer_quota", (to, quota_type, diff)).await
     }
 
-    async fn batch_transfer_quota(&self, canister: &Principal, request: BatchTransferRequest) -> ICNSActorResult<bool> {
-        call_canister_as_icns_result(canister_id, "batch_transfer_quota", (request, )).await
+    async fn batch_transfer_quota(&self, canister: &Principal, request: BatchTransferRequest) -> ActorResult<bool> {
+        call_canister_as_actor_result(canister, "batch_transfer_quota", (request, )).await
     }
 
     async fn transfer_from_quota(
         &self,
         canister: &Principal,
         request: TransferFromQuotaRequest,
-    ) -> ICNSActorResult<bool> {
-        call_canister_as_icns_result(canister_id, "transfer_from_quota", (request, )).await
+    ) -> ActorResult<bool> {
+        call_canister_as_actor_result(canister, "transfer_from_quota", (request, )).await
     }
-    async fn approve(&self, canister: &Principal, name: String, to: Principal) -> ICNSActorResult<bool> {
-        call_canister_as_icns_result(canister_id, "approve", (name, to)).await
-    }
-
-    async fn transfer(&self, canister: &Principal, name: String, new_owner: Principal) -> ICNSActorResult<bool> {
-        call_canister_as_icns_result(canister_id, "transfer", (name, new_owner)).await
+    async fn approve(&self, canister: &Principal, name: String, to: Principal) -> ActorResult<bool> {
+        call_canister_as_actor_result(canister, "approve", (name, to)).await
     }
 
-    async fn transfer_from(&self, canister: &Principal, name: String) -> ICNSActorResult<bool> {
-        call_canister_as_icns_result(canister_id, "transfer_from", (name, )).await
+    async fn transfer(&self, canister: &Principal, name: String, new_owner: Principal) -> ActorResult<bool> {
+        call_canister_as_actor_result(canister, "transfer", (name, new_owner)).await
+    }
+
+    async fn transfer_from(&self, canister: &Principal, name: String) -> ActorResult<bool> {
+        call_canister_as_actor_result(canister, "transfer_from", (name, )).await
     }
 }
 
@@ -55,9 +56,9 @@ pub struct DFTApi {}
 impl IDFTApi for DFTApi {
     async fn mint(
         &self,
-        user: &Principal,
-        created_at: Option<u64>,
         canister: &Principal,
+        user: &Principal,
+        created_at: Option<TimeInNs>,
         amount: Nat,
     ) -> ActorResult<OperationResult> {
         call_canister_as_actor_result(
@@ -70,46 +71,32 @@ impl IDFTApi for DFTApi {
 
     async fn approve(
         &self,
-        token_id: Principal,
+        canister: &Principal,
         owner_sub_account: Option<Subaccount>,
         spender: String,
         value: Nat,
-        created_at: Option<u64>,
-    ) -> OperationResult {
-        let result: Result<(OperationResult, ), _> = call(
-            token_id,
+        created_at: Option<TimeInNs>,
+    ) -> ActorResult<OperationResult> {
+        call_canister_as_actor_result(
+            canister,
             "approve",
             (owner_sub_account, spender, value, created_at),
         )
-            .await;
-        match result {
-            Ok((result, )) => result,
-            Err((error, msg)) => OperationResult::Err(ErrorInfo {
-                message: msg,
-                code: error as u32,
-            }),
-        }
+            .await
     }
     async fn transfer(
         &self,
-        token_id: Principal,
+        canister: &Principal,
         from_sub_account: Option<Subaccount>,
         to: String,
         value: Nat,
-        created_at: Option<u64>,
-    ) -> OperationResult {
-        let result: Result<(OperationResult, ), _> = call(
-            token_id,
+        created_at: Option<TimeInNs>,
+    ) -> ActorResult<OperationResult> {
+        call_canister_as_actor_result(
+            canister,
             "transfer",
             (from_sub_account, to, value, created_at),
         )
-            .await;
-        match result {
-            Ok((result, )) => result,
-            Err((error, msg)) => OperationResult::Err(ErrorInfo {
-                message: msg,
-                code: error as u32,
-            }),
-        }
+            .await
     }
 }

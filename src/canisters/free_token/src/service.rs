@@ -1,5 +1,4 @@
-use crate::canister_api::{DFTApi, IDFTApi, IICNamingApi, OperationResult};
-use crate::ic_api::ic_now;
+use crate::canister_api::{IDFTApi, IICNamingApi, OperationResult};
 use crate::permissions::{must_not_anonymous, ActorResult, ErrorInfo, MintError};
 use crate::state::{TransactionId, STATE, State, User};
 use candid::utils::{ArgumentDecoder, ArgumentEncoder};
@@ -15,7 +14,9 @@ use std::future::Future;
 use std::ptr::null;
 use std::sync::Arc;
 use crate::canister_api::api_impl::{DFTApi, ICNamingApi};
-use crate::reward_store::{RewardCode, RewardType};
+use crate::received_reward_store::ReceivesRewardRecord;
+use crate::reward_store::{RewardCode, RewardPackage, RewardType};
+use crate::TimeInNs;
 
 #[cfg(test)]
 mod tests;
@@ -35,78 +36,84 @@ impl Default for FreeTokenService {
 }
 
 impl FreeTokenService {
-    pub async fn receive_free_token(&self, user: &Principal, code: &RewardCode) -> CommonResult<bool> {
-        let user = must_not_anonymous(user)?;
-        let now = ic_now();
+    pub async fn receive_free_token(&self, user: &Principal, code: &RewardCode, time: TimeInNs) -> CommonResult<bool> {
+        let user = &must_not_anonymous(user)?;
 
-        let reward_package = STATE.with(|state| {
-            let state = state.borrow();
-            state.is_able_receive(user.clone(), code);
-            state.receive_reward(user.clone(), code, Some(now))?
+        let mut reward_record = STATE.with(|state| {
+            state.is_able_receive(user, code);
+            state.receive_reward(user, code, time)
+        })?;
+
+
+        self.send_reward(user, &mut reward_record, time).await;
+
+
+        STATE.with(|state| {
+            let mut received_reward_store = state.received_reward_record_store.borrow_mut();
+            received_reward_store.update_received_reward_record(user.clone(), code.clone(), &reward_record);
         });
-
-        let dft_api = &self.dft_api;
-        for reward_type in reward_package.reward_types() {
-            let result = match reward_type {
-                RewardType::TokenMintRewardPackage { canister, amount } => {
-                    dft_api.mint(user.into(), Option::Some(now), reward_package.clone()).await
-                },
-                RewardType::TokenBurnRewardPackage { canister, amount } => {
-                    dft_api.burn(user.into(), Option::Some(now), reward_package.clone()).await
-                }
-
-            }
-            debug!("mint result: {:?}", result);
-            if result.is_ok() {
-                STATE.with(|state| {
-                    let mut records = state.free_records.borrow_mut();
-                    let record = FreeTokenRecord::new(
-                        setting.mintable,
-                        setting.free_amount,
-                        Option::Some(now),
-                        user.clone(),
-                    );
-                    records
-                        .entry(mintable.clone())
-                        .or_insert_with(HashMap::new)
-                        .insert(user.clone(), record);
-                });
-            }
-            match result {
-                Ok(..) => Ok(true),
-                Err(e) => {
-                    error!("mint error: {:?}", e);
-                    Err(MintError::from(e).into())
-                }
-            }
-        }
-
-        pub async fn unlimited_receive_free_token(&self, user: &Principal, mintable: &Principal) -> CommonResult<bool> {
-            let dft_api = &self.dft_api;
-            let setting = get_mintable(mintable)?;
-            let now = ic_now();
-            let result = dft_api.mint(user, Some(now), setting).await;
-            debug!("mint result: {:?}", result);
-            match result {
-                Ok(..) => Ok(true),
-                Err(e) => {
-                    error!("mint error: {:?}", e);
-                    Err(MintError::from(e).into())
-                }
-            }
-        }
-        pub fn init(&self, mintable: &Principal, amount: Nat, unlimited_users: Option<Vec<Principal>>) {
-            STATE.with(|state| {
-                let mut free_settings = state.free_settings.borrow_mut();
-                let mut unlimited_users_settings = state.unlimited_users.borrow_mut();
-                free_settings.push(FreeSetting::new(amount, mintable.clone()));
-                if let Some(unlimited_users) = unlimited_users {
-                    unlimited_users_settings.extend(unlimited_users);
-                } else {
-                    unlimited_users_settings.clear();
-                }
-            });
-        }
+        Ok(true)
+        // if result.is_ok() {
+        //     STATE.with(|state| {
+        //         let mut records = state.free_records.borrow_mut();
+        //         let record = FreeTokenRecord::new(
+        //             setting.mintable,
+        //             setting.free_amount,
+        //             Option::Some(now),
+        //             user.clone(),
+        //         );
+        //         records
+        //             .entry(mintable.clone())
+        //             .or_insert_with(HashMap::new)
+        //             .insert(user.clone(), record);
+        //     });
+        // }
+        // match result {
+        //     Ok(..) => Ok(true),
+        //     Err(e) => {
+        //         error!("mint error: {:?}", e);
+        //         Err(MintError::from(e).into())
+        //     }
+        // }
     }
 
-    pub type CommonResult<T> = anyhow::Result<T, MintError>;
+
+    pub async fn send_reward(&self, user: &User, reward_record: &mut ReceivesRewardRecord, time: TimeInNs) {
+        let dft_api = &self.dft_api;
+        let icnaming_api = &self.icnaming_api;
+        let principal: Principal = user.0;
+        for reward_type in reward_record.get_reward_type() {
+            let result: ActorResult<bool> = match reward_type.clone() {
+                RewardType::TokenMintRewardPackage { canister, amount } => {
+                    let result = dft_api.mint(&canister, &principal, Some(time), amount.clone()).await;
+                    match result {
+                        Ok(..) => Ok(true),
+                        Err(e) => {
+                            Err(e)
+                        }
+                    }
+                }
+                RewardType::TokenTransferRewardPackage { canister, amount } => {
+                    let result = dft_api.transfer(&canister, None, principal.to_text(), amount.clone(), Some(time)).await;
+                    match result {
+                        Ok(..) => Ok(true),
+                        Err(e) => {
+                            Err(e)
+                        }
+                    }
+                }
+                RewardType::QuotaRewardPackage { canister, quota_type, diff } => {
+                    icnaming_api.transfer_quota(&canister, principal, quota_type.clone(), diff.clone()).await
+                }
+            };
+            match result {
+                Ok(..) => (reward_record.set_reward_state_completed(&reward_type)),
+                Err(e) => {
+                    error!("send reward error: {:?}", e);
+                }
+            }
+        }
+    }
+}
+
+pub type CommonResult<T> = anyhow::Result<T, MintError>;

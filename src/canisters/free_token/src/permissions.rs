@@ -2,6 +2,7 @@ use crate::state::{STATE, User};
 use candid::{CandidType, Deserialize, Principal};
 use std::borrow::Borrow;
 use thiserror::Error;
+use crate::canister_api::OperationResult;
 
 
 pub fn must_not_anonymous(caller: &Principal) -> DexServiceResult<User> {
@@ -11,8 +12,6 @@ pub fn must_not_anonymous(caller: &Principal) -> DexServiceResult<User> {
     Ok(User(caller.clone()))
 }
 
-
-pub type ICNSActorResult<T> = Result<T, ErrorInfo>;
 
 #[derive(Debug, Clone, Ord, PartialOrd, Eq, PartialEq, CandidType, Deserialize, Error)]
 pub enum MintError {

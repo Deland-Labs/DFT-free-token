@@ -1,4 +1,4 @@
-use crate::permissions::{ActorResult, ErrorInfo, ICNSActorResult};
+use crate::permissions::{ActorResult, ErrorInfo};
 use crate::state::{STATE};
 use async_trait::async_trait;
 use candid::utils::{ArgumentDecoder, ArgumentEncoder};
@@ -10,6 +10,7 @@ use serde::Deserialize;
 use std::fmt::{Debug, Display};
 use std::future::Future;
 use crate::reward_store::{QuotaType, RewardPackage, RewardType};
+use crate::TimeInNs;
 
 #[cfg(test)]
 pub mod tests;
@@ -23,41 +24,41 @@ pub trait IICNamingApi {
         to: Principal,
         quota_type: QuotaType,
         diff: u32,
-    ) -> ICNSActorResult<bool>;
+    ) -> ActorResult<bool>;
 
-    async fn batch_transfer_quota(&self, canister: &Principal, request: BatchTransferRequest) -> ICNSActorResult<bool>;
+    async fn batch_transfer_quota(&self, canister: &Principal, request: BatchTransferRequest) -> ActorResult<bool>;
 
     async fn transfer_from_quota(&self, canister: &Principal, request: TransferFromQuotaRequest)
-                                 -> ICNSActorResult<bool>;
+                                 -> ActorResult<bool>;
 
-    async fn approve(&self, canister: &Principal, name: String, to: Principal) -> ICNSActorResult<bool>;
+    async fn approve(&self, canister: &Principal, name: String, to: Principal) -> ActorResult<bool>;
 
-    async fn transfer(&self, canister: &Principal, name: String, new_owner: Principal) -> ICNSActorResult<bool>;
+    async fn transfer(&self, canister: &Principal, name: String, new_owner: Principal) -> ActorResult<bool>;
 
-    async fn transfer_from(&self, canister: &Principal, name: String) -> ICNSActorResult<bool>;
+    async fn transfer_from(&self, canister: &Principal, name: String) -> ActorResult<bool>;
 }
 
 
 #[async_trait]
 pub trait IDFTApi {
-    async fn mint(&self, user: &Principal, created_at: Option<u64>, canister: &Principal, amount: Nat)
+    async fn mint(&self, canister: &Principal, user: &Principal, created_at: Option<TimeInNs>, value: Nat)
                   -> ActorResult<OperationResult>;
     async fn transfer(
         &self,
-        token_id: Principal,
+        canister: &Principal,
         from_sub_account: Option<Subaccount>,
         to: String,
         value: Nat,
-        created_at: Option<u64>,
-    ) -> OperationResult;
+        created_at: Option<TimeInNs>,
+    ) -> ActorResult<OperationResult>;
     async fn approve(
         &self,
-        token_id: Principal,
+        canister: &Principal,
         owner_sub_account: Option<Subaccount>,
         spender: String,
         value: Nat,
-        created_at: Option<u64>,
-    ) -> OperationResult;
+        created_at: Option<TimeInNs>,
+    ) -> ActorResult<OperationResult>;
 }
 
 #[derive(CandidType, Debug, Clone, Deserialize, Default)]
@@ -69,21 +70,12 @@ pub struct OperationResult {
     error: Option<ErrorInfo>,
 }
 
-async fn call_canister_as_icns_result<T, TResult>(
-    canister_id: &Principal,
-    method: &str,
-    args: T,
-) -> ICNSActorResult<TResult>
-    where
-        T: candid::utils::ArgumentEncoder,
-        TResult: for<'a> Deserialize<'a> + CandidType + Debug,
-{
-    let result = call_core::<T, ICNSActorResult<TResult>>(canister_id, method, args, true).await;
-    match result {
-        Ok(result) => result,
-        Err(error) => Err(error),
+impl From<OperationResult> for bool {
+    fn from(result: OperationResult) -> bool {
+        result.error.is_none()
     }
 }
+
 
 async fn call_canister_as_actor_result<T, TResult>(
     canister_id: &Principal,
