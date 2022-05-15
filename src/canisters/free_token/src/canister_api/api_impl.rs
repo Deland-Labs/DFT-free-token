@@ -4,13 +4,8 @@ use crate::canister_api::{BatchTransferRequest, call, call_canister_as_actor_res
 use crate::permissions::{ActorResult, ErrorInfo};
 use crate::reward_store::QuotaType;
 
-pub struct ICNamingApi;
-
-impl ICNamingApi {
-    pub fn new() -> Self {
-        ICNamingApi
-    }
-}
+#[derive(Debug, Default)]
+pub struct ICNamingApi {}
 
 #[async_trait]
 impl IICNamingApi for ICNamingApi {

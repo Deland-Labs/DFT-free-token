@@ -30,7 +30,7 @@ impl Default for FreeTokenService {
     fn default() -> Self {
         Self {
             dft_api: Arc::new(DFTApi::default()),
-            icnaming_api: Arc::new(ICNamingApi::new()),
+            icnaming_api: Arc::new(ICNamingApi::default()),
         }
     }
 }

@@ -50,7 +50,8 @@ impl State {
         }
         let unlimited_user_store = state.unlimited_user_store.borrow();
         let received_reward_record_store = state.received_reward_record_store.borrow();
-        if received_reward_record_store.is_received_state_all_completed(user, reward_code) {
+        if received_reward_record_store.is_received_state_all_completed(user, reward_code) == true
+            || unlimited_user_store.is_unlimited_user(user) == false {
             return Err(MintError::RewardIncomplete).into();
         }
 
