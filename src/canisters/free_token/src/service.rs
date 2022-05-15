@@ -19,7 +19,7 @@ use crate::reward_store::{RewardCode, RewardPackage, RewardType};
 use crate::TimeInNs;
 
 #[cfg(test)]
-mod tests;
+pub mod tests;
 
 pub struct FreeTokenService {
     pub dft_api: Arc<dyn IDFTApi>,

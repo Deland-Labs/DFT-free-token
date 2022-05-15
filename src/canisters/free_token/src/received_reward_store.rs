@@ -5,6 +5,9 @@ use crate::reward_store::{RewardCode, RewardStore, RewardType};
 use crate::state::User;
 use crate::TimeInNs;
 
+#[cfg(test)]
+mod tests;
+
 #[derive(Default)]
 pub struct ReceivedRewardRecordStore {
     received_reward_records: HashMap<RewardCode, HashMap<User, Vec<ReceivesRewardRecord>>>,
@@ -16,9 +19,9 @@ impl ReceivedRewardRecordStore {
             received_reward_records: HashMap::new(),
         }
     }
-    pub fn add_received_reward_record(&mut self, user: User, reward_store: RewardCode, received_reward_record: ReceivesRewardRecord) {
+    pub fn add_received_reward_record(&mut self, user: User, reward_code: RewardCode, received_reward_record: ReceivesRewardRecord) {
         self.received_reward_records
-            .entry(reward_store)
+            .entry(reward_code)
             .or_insert_with(|| HashMap::new())
             .entry(user)
             .or_insert_with(Vec::new)
