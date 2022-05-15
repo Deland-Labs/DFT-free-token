@@ -38,14 +38,17 @@ impl Default for FreeTokenService {
 impl FreeTokenService {
     pub async fn receive_free_token(&self, user: &Principal, code: &RewardCode, time: TimeInNs) -> CommonResult<bool> {
         let user = &must_not_anonymous(user)?;
+        println!("call receive_free_token");
 
         let mut reward_record = STATE.with(|state| {
-            state.is_able_receive(user, code);
+            state.is_able_receive(user, code)?;
             state.receive_reward(user, code, time)
         })?;
 
 
         self.send_reward(user, &mut reward_record, time).await;
+
+        println!("reward_record {:?}", reward_record);
 
 
         STATE.with(|state| {
@@ -53,28 +56,6 @@ impl FreeTokenService {
             received_reward_store.update_received_reward_record(user.clone(), code.clone(), &reward_record);
         });
         Ok(true)
-        // if result.is_ok() {
-        //     STATE.with(|state| {
-        //         let mut records = state.free_records.borrow_mut();
-        //         let record = FreeTokenRecord::new(
-        //             setting.mintable,
-        //             setting.free_amount,
-        //             Option::Some(now),
-        //             user.clone(),
-        //         );
-        //         records
-        //             .entry(mintable.clone())
-        //             .or_insert_with(HashMap::new)
-        //             .insert(user.clone(), record);
-        //     });
-        // }
-        // match result {
-        //     Ok(..) => Ok(true),
-        //     Err(e) => {
-        //         error!("mint error: {:?}", e);
-        //         Err(MintError::from(e).into())
-        //     }
-        // }
     }
 
 
@@ -106,6 +87,7 @@ impl FreeTokenService {
                     icnaming_api.transfer_quota(&canister, principal, quota_type.clone(), diff.clone()).await
                 }
             };
+            println!("result: {:?}", result);
             match result {
                 Ok(..) => (reward_record.set_reward_state_completed(&reward_type)),
                 Err(e) => {

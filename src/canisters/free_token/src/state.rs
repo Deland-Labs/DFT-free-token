@@ -50,13 +50,17 @@ impl State {
         }
         let unlimited_user_store = state.unlimited_user_store.borrow();
         let received_reward_record_store = state.received_reward_record_store.borrow();
-        if received_reward_record_store.is_received_state_all_completed(user, reward_code) == true
-            || unlimited_user_store.is_unlimited_user(user) == false {
+        if unlimited_user_store.is_unlimited_user(user) {
+            return Ok(());
+        }
+
+        if !received_reward_record_store.is_received_state_all_completed(user, reward_code) {
             return Err(MintError::RewardIncomplete).into();
         }
 
-        if received_reward_record_store.is_received_reward_record_exist(user, reward_code) == true
-            || unlimited_user_store.is_unlimited_user(user) == false {
+        let is_exist = received_reward_record_store.is_received_reward_record_exist(user, reward_code);
+        println!("is_exist: {}", is_exist);
+        if is_exist {
             return Err(MintError::RewardAlreadyReceived).into();
         }
         Ok(())
@@ -91,7 +95,7 @@ impl UnlimitedUserStore {
     pub fn add_unlimited_user(&mut self, user: User, reward_codes: Vec<RewardCode>) {
         self.unlimited_users
             .entry(user)
-            .or_insert(Vec::new())
+            .or_insert_with(|| Vec::new())
             .extend(reward_codes);
     }
     pub fn remove_unlimited_user(&mut self, user: User) {
@@ -100,10 +104,4 @@ impl UnlimitedUserStore {
     pub fn is_unlimited_user(&self, user: &User) -> bool {
         self.unlimited_users.contains_key(user)
     }
-}
-
-
-pub struct UnlimitedUser {
-    user: User,
-    reward_codes: Vec<RewardCode>,
 }

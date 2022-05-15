@@ -25,22 +25,22 @@ impl ReceivedRewardRecordStore {
             .push(received_reward_record);
     }
 
-    pub fn get_received_reward_records(&self, reward_store: &RewardCode, user: &User) -> Option<&Vec<ReceivesRewardRecord>> {
-        self.received_reward_records.get(reward_store).and_then(|received_reward_records| received_reward_records.get(user))
+    pub fn get_received_reward_records(&self, reward_code: &RewardCode, user: &User) -> Option<&Vec<ReceivesRewardRecord>> {
+        self.received_reward_records.get(reward_code).and_then(|received_reward_records| received_reward_records.get(user))
     }
-    pub fn is_received_reward_record_exist(&self, user: &User, reward_store: &RewardCode) -> bool {
-        self.get_received_reward_records(reward_store, user)
-            .map(|received_reward_records| received_reward_records.iter().len() > 0)
+    pub fn is_received_reward_record_exist(&self, user: &User, reward_code: &RewardCode) -> bool {
+        self.get_received_reward_records(reward_code, user)
+            .map(|received_reward_records| !received_reward_records.is_empty())
             .unwrap_or(false)
     }
-    pub fn is_received_state_all_completed(&self, user: &User, reward_store: &RewardCode) -> bool {
-        self.get_received_reward_records(reward_store, user)
+    pub fn is_received_state_all_completed(&self, user: &User, reward_code: &RewardCode) -> bool {
+        self.get_received_reward_records(reward_code, user)
             .map(|received_reward_records| {
                 received_reward_records.iter().all(|received_reward_record| {
                     received_reward_record.is_state_all_completed()
                 })
             })
-            .unwrap_or(false)
+            .unwrap_or(true)
     }
 
     pub fn update_received_reward_record(&mut self, user: User, reward_code: RewardCode, received_reward_record: &ReceivesRewardRecord) {
@@ -61,13 +61,13 @@ impl ReceivedRewardRecordStore {
     }
 }
 
-#[derive(CandidType, Deserialize, Clone)]
+#[derive(CandidType, Deserialize, Clone, Debug)]
 pub enum ReceivesRewardRecordState {
     Sending,
     Completed,
 }
 
-#[derive(CandidType, Deserialize, Clone)]
+#[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct ReceivesRewardRecord {
     rewards: HashMap<RewardType, ReceivesRewardRecordState>,
     created_at: TimeInNs,
