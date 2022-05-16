@@ -9,7 +9,7 @@ use ic_cdk_macros::*;
 use log::{debug, logger, LevelFilter};
 use std::panic;
 use yansi::Paint;
-use crate::reward_store::RewardCode;
+use crate::reward_store::{RewardCode, RewardPackage};
 use crate::TimeInNs;
 
 #[init]
@@ -35,6 +35,17 @@ async fn receive_free_token(key: String) -> BooleanResult {
     let service = FreeTokenService::default();
 
     let result = service.receive_free_token(&caller, &RewardCode(key), TimeInNs(now)).await;
+    result.into()
+}
+
+async fn add_reward(
+    reward_code: RewardCode,
+    reward_package: RewardPackage,
+    unlimited_users: Option<Vec<Principal>>,
+) -> BooleanResult {
+    let caller = api::caller();
+    let service = FreeTokenService::default();
+    let result = service.add_reward(&caller, reward_code, reward_package, unlimited_users).await;
     result.into()
 }
 

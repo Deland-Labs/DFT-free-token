@@ -12,8 +12,6 @@ fn empty_received_reward_record_manager() -> ReceivedRewardRecordStore {
 fn received_reward_record_manager_with_one_completed(
     mut _empty_received_reward_record_manager: ReceivedRewardRecordStore,
     mock_user1: Principal,
-    mock_user2: Principal,
-    mock_user3: Principal,
     reward_package_store_1: HashMap<RewardCode, RewardPackage>,
     mock_now: u64,
 ) -> ReceivedRewardRecordStore {

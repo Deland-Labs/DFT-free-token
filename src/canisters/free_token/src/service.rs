@@ -50,6 +50,20 @@ impl FreeTokenService {
         Ok(true)
     }
 
+    pub async fn add_reward(&self, user: &Principal, code: RewardCode, reward_package: RewardPackage, unlimited_users: Option<Vec<Principal>>) -> CommonResult<(bool)> {
+        let user = &must_not_anonymous(user)?;
+        STATE.with(|state| {
+            let mut reward_store = state.reward_store.borrow_mut();
+            let mut unlimited_user_store = state.unlimited_user_store.borrow_mut();
+            reward_store.add_reward(code.clone(), reward_package);
+            if let Some(unlimited_users) = unlimited_users {
+                unlimited_user_store.add_unlimited_user(code.clone(), unlimited_users.iter().map(|u| User(u.clone())).collect());
+            }
+        });
+
+        Ok(true)
+    }
+
 
     pub async fn send_reward(&self, user: &User, reward_record: &mut ReceivesRewardRecord, time: TimeInNs) {
         let dft_api = &self.dft_api;

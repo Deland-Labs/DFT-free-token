@@ -5,6 +5,7 @@ use candid::{Nat, Principal, CandidType, Deserialize, Error};
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub struct RewardCode(pub String);
 
+#[derive(Debug, Clone, Ord, PartialOrd, Eq, Hash, PartialEq, CandidType, Deserialize)]
 pub struct RewardPackage(Vec<RewardType>);
 
 impl RewardPackage {

@@ -50,7 +50,7 @@ impl State {
         }
         let unlimited_user_store = state.unlimited_user_store.borrow();
         let received_reward_record_store = state.received_reward_record_store.borrow();
-        if unlimited_user_store.is_unlimited_user(user) {
+        if unlimited_user_store.is_unlimited_user(reward_code.clone(), user) {
             return Ok(());
         }
 
@@ -88,20 +88,21 @@ impl State {
 
 #[derive(Default)]
 pub struct UnlimitedUserStore {
-    unlimited_users: HashMap<User, Vec<RewardCode>>,
+    unlimited_users: HashMap<RewardCode, Vec<User>>,
 }
 
 impl UnlimitedUserStore {
-    pub fn add_unlimited_user(&mut self, user: User, reward_codes: Vec<RewardCode>) {
-        self.unlimited_users
-            .entry(user)
-            .or_insert_with(|| Vec::new())
-            .extend(reward_codes);
+    pub fn add_unlimited_user(&mut self, reward_code: RewardCode, users: Vec<User>) {
+        self.unlimited_users.insert(reward_code, users);
     }
-    pub fn remove_unlimited_user(&mut self, user: User) {
-        self.unlimited_users.remove(&user);
+    pub fn remove_unlimited_user(&mut self, reward_code: RewardCode, user: &User) {
+        self.unlimited_users.get_mut(&reward_code).unwrap().retain(|u| u != user);
     }
-    pub fn is_unlimited_user(&self, user: &User) -> bool {
-        self.unlimited_users.contains_key(user)
+    pub fn is_unlimited_user(&self, reward_code: RewardCode, user: &User) -> bool {
+        return if let Some(users) = self.unlimited_users.get(&reward_code) {
+            users.contains(user)
+        } else {
+            false
+        };
     }
 }
