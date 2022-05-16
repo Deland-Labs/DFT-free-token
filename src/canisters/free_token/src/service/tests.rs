@@ -256,21 +256,22 @@ mod ensure_received_reward_package_1 {
         let t1 = STATE.with(|state| {
             let record_store = state.received_reward_record_store.borrow();
             record_store
-                .get_received_reward_records(&RewardCode(String::from("reward_code_1")), &User(mock_user1.clone())).unwrap().clone()
+                .get_received_reward_record(&RewardCode(String::from("reward_code_1")), &User(mock_user1.clone())).unwrap().clone()
         });
-        println!("{:?}", t1.len());
+        println!("{:?}", t1);
     }
 
     #[rstest]
-    async fn test_ensure_received_reward_package_1_unlimit_user(
-        mock_user1: Principal,
+    async fn test_ensure_received_reward_package_1_unlimited_user(
         mock_user3: Principal,
         service: FreeTokenService,
         reward_package_store_1: HashMap<RewardCode, RewardPackage>,
         mock_now: u64,
     ) {
+        let record_types = reward_package_store_1.values().next().unwrap().reward_types();
+        let code = reward_package_store_1.keys().next().unwrap();
         let result = service
-            .receive_free_token(&mock_user3, &RewardCode(String::from("reward_code_1")), TimeInNs(mock_now)).await;
+            .receive_free_token(&mock_user3, code, TimeInNs(mock_now)).await;
         match result {
             Ok(res) => {
                 assert_eq!(res, true);
@@ -278,7 +279,7 @@ mod ensure_received_reward_package_1 {
             Err(e) => panic!("{:?}", e),
         }
         let result = service
-            .receive_free_token(&mock_user3, &RewardCode(String::from("reward_code_1")), TimeInNs(mock_now)).await;
+            .receive_free_token(&mock_user3, code, TimeInNs(mock_now)).await;
         match result {
             Ok(res) => {
                 assert_eq!(res, true);
@@ -286,11 +287,10 @@ mod ensure_received_reward_package_1 {
             Err(e) => panic!("{:?}", e),
         }
 
-        let t1 = STATE.with(|state| {
+        let records = STATE.with(|state| {
             let record_store = state.received_reward_record_store.borrow();
             record_store
-                .get_received_reward_records(&RewardCode(String::from("reward_code_1")), &User(mock_user3.clone())).unwrap().clone()
+                .get_received_reward_record(code, &User(mock_user3.clone())).unwrap().clone()
         });
-        println!("{:?}", t1.len());
     }
 }

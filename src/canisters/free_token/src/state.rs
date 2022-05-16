@@ -59,7 +59,6 @@ impl State {
         }
 
         let is_exist = received_reward_record_store.is_received_reward_record_exist(user, reward_code);
-        println!("is_exist: {}", is_exist);
         if is_exist {
             return Err(MintError::RewardAlreadyReceived).into();
         }
@@ -81,6 +80,7 @@ impl State {
 
         let reward_record = ReceivesRewardRecord::new(reward_record_hash, time);
         received_reward_record_store.add_received_reward_record(user.clone(), reward_code.clone(), reward_record.clone());
+        println!("receive_reward: {:?}", reward_record);
         Ok(reward_record)
     }
 }

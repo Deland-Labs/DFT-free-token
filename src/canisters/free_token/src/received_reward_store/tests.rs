@@ -39,8 +39,6 @@ fn received_reward_record_manager_with_one_completed(
 fn test_add_one_completed(
     mut received_reward_record_manager_with_one_completed: ReceivedRewardRecordStore,
     mock_user1: Principal,
-    mock_user2: Principal,
-    mock_user3: Principal,
     reward_package_store_1: HashMap<RewardCode, RewardPackage>,
     mock_now: u64,
 ) {
@@ -58,7 +56,7 @@ fn test_add_one_completed(
         code.clone(),
         reward_record,
     );
-    let result = manager.get_received_reward_records(&code.clone(), &User(mock_user1));
+    let result = manager.get_received_reward_record(&code, &User(mock_user1));
     // assert
-    assert_eq!(result.unwrap().len(), 2);
+
 }

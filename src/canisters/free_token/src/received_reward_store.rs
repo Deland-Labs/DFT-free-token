@@ -10,7 +10,8 @@ mod tests;
 
 #[derive(Default)]
 pub struct ReceivedRewardRecordStore {
-    received_reward_records: HashMap<RewardCode, HashMap<User, Vec<ReceivesRewardRecord>>>,
+    received_reward_records: HashMap<RewardCode, HashMap<User, ReceivesRewardRecord>>,
+
 }
 
 impl ReceivedRewardRecordStore {
@@ -22,45 +23,26 @@ impl ReceivedRewardRecordStore {
     pub fn add_received_reward_record(&mut self, user: User, reward_code: RewardCode, received_reward_record: ReceivesRewardRecord) {
         self.received_reward_records
             .entry(reward_code)
-            .or_insert_with(|| HashMap::new())
-            .entry(user)
-            .or_insert_with(Vec::new)
-            .push(received_reward_record);
+            .or_insert_with(HashMap::new)
+            .insert(user, received_reward_record);
     }
 
-    pub fn get_received_reward_records(&self, reward_code: &RewardCode, user: &User) -> Option<&Vec<ReceivesRewardRecord>> {
-        self.received_reward_records.get(reward_code).and_then(|received_reward_records| received_reward_records.get(user))
+    pub fn get_received_reward_record(&self, reward_code: &RewardCode, user: &User) -> Option<&ReceivesRewardRecord> {
+        self.received_reward_records
+            .get(reward_code)
+            .and_then(|user_reward_records| user_reward_records.get(user))
     }
     pub fn is_received_reward_record_exist(&self, user: &User, reward_code: &RewardCode) -> bool {
-        self.get_received_reward_records(reward_code, user)
-            .map(|received_reward_records| !received_reward_records.is_empty())
-            .unwrap_or(false)
+        self.get_received_reward_record(reward_code, user).is_some()
     }
     pub fn is_received_state_all_completed(&self, user: &User, reward_code: &RewardCode) -> bool {
-        self.get_received_reward_records(reward_code, user)
-            .map(|received_reward_records| {
-                received_reward_records.iter().all(|received_reward_record| {
-                    received_reward_record.is_state_all_completed()
-                })
-            })
+        self.get_received_reward_record(reward_code, user)
+            .map(|received_reward_record| received_reward_record.is_state_all_completed())
             .unwrap_or(true)
     }
 
     pub fn update_received_reward_record(&mut self, user: User, reward_code: RewardCode, received_reward_record: &ReceivesRewardRecord) {
-        self.received_reward_records
-            .entry(reward_code.clone())
-            .or_insert_with(|| HashMap::new())
-            .entry(user.clone())
-            .or_insert_with(Vec::new)
-            .retain(|received_reward_record| {
-                received_reward_record.get_reward_type() != received_reward_record.get_reward_type()
-            });
-        self.received_reward_records
-            .entry(reward_code)
-            .or_insert_with(|| HashMap::new())
-            .entry(user)
-            .or_insert_with(Vec::new)
-            .push(received_reward_record.clone());
+        self.add_received_reward_record(user, reward_code, received_reward_record.clone());
     }
 }
 
