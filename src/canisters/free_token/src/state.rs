@@ -96,7 +96,9 @@ impl UnlimitedUserStore {
         self.unlimited_users.insert(reward_code, users);
     }
     pub fn remove_unlimited_user(&mut self, reward_code: RewardCode, user: &User) {
-        self.unlimited_users.get_mut(&reward_code).unwrap().retain(|u| u != user);
+        if let Some(users) = self.unlimited_users.get_mut(&reward_code) {
+            users.retain(|u| u != user);
+        }
     }
     pub fn is_unlimited_user(&self, reward_code: RewardCode, user: &User) -> bool {
         return if let Some(users) = self.unlimited_users.get(&reward_code) {

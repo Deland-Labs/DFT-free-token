@@ -143,8 +143,7 @@ fn service(
         let mut unlimited_user_store = s.unlimited_user_store.borrow_mut();
         for (code, reward_package) in reward_package_store_1.into_iter() {
             reward_store.add_reward(code.clone(), reward_package);
-            unlimited_user_store.add_unlimited_user(User(mock_user3), vec![code.clone()]);
-            unlimited_user_store.add_unlimited_user(User(mock_user4), vec![code.clone()]);
+            unlimited_user_store.add_unlimited_user(code.clone(), vec![User(mock_user4), User(mock_user3)]);
         }
     });
     let mut service = FreeTokenService::default();
