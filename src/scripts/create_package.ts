@@ -6,35 +6,35 @@ import logger from "node-color-log";
 
 const package_dir = "package"
 // dir to save packages build by diff feature
-const package_features_dir = "package_feature"
+const package_canister_env_dir = "package_canister_env"
 const canister_ids_dir = "canister_ids"
 
 const build_all = async (build_context: BuildContext) => {
     // reset package_feature dir
-    if (fs.existsSync(package_features_dir)) {
-        fs.rmSync(package_features_dir, {recursive: true})
+    if (fs.existsSync(package_canister_env_dir)) {
+        fs.rmSync(package_canister_env_dir, {recursive: true})
     }
-    fs.mkdirSync(package_features_dir)
+    fs.mkdirSync(package_canister_env_dir)
 
     // distinct feature
-    const features = build_context.features;
+    const canister_envs = build_context.canister_envs;
 
     // build each canister by each feature
-    for (const feature of features) {
+    for (const canisterEnv of canister_envs) {
         // make a feature dif
-        const feature_dir = `${package_features_dir}/${feature}`
-        fs.mkdirSync(feature_dir)
+        const canister_env_dir = `${package_canister_env_dir}/${canisterEnv}`
+        fs.mkdirSync(canister_env_dir)
 
-        logger.debug(`build feature: ${feature}`);
+        logger.debug(`build canister_env: ${canisterEnv}`);
         for (const [name, canister_json] of Object.entries(build_context.canisters)) {
-            canister.build(name, feature);
+            canister.build(name, canisterEnv);
             // copy wasm files to feature dir
             const wasm_path = get_wasm_path(canister_json);
-            fs.copyFileSync(wasm_path, `${feature_dir}/${name}.wasm`);
+            fs.copyFileSync(wasm_path, `${canister_env_dir}/${name}.wasm`);
 
             // copy did files to feature dir
             const did_path = canister_json.candid;
-            fs.copyFileSync(did_path, `${feature_dir}/${name}.did`);
+            fs.copyFileSync(did_path, `${canister_env_dir}/${name}.did`);
         }
     }
 }
@@ -51,15 +51,15 @@ const clean = async () => {
 
 const check = async (build_context: BuildContext) => {
     // ensure every wasm file in package_feature dir must be < 2MB, check recursive
-    for (const feature of build_context.features) {
-        const feature_dir = `${package_features_dir}/${feature}`
+    for (const feature of build_context.canister_envs) {
+        const feature_dir = `${package_canister_env_dir}/${feature}`
         const files = fs.readdirSync(feature_dir);
         for (const file of files) {
             if (file.endsWith(".wasm")) {
                 const file_path = `${feature_dir}/${file}`
                 const stat = fs.statSync(file_path);
                 if (stat.size > 2 * 1024 * 1024) {
-                    throw new Error(`WASM file size of ${file} is ${stat.size} bytes, must be < 2MB`);
+                    logger.warn(`WASM file size of ${file} is ${stat.size} bytes, must be < 2MB`);
                 }
             }
         }
@@ -77,6 +77,7 @@ const create = async (build_context: BuildContext) => {
                 "packtool": ""
             }
         },
+        "canisters": {},
         "networks": {
             "local": {
                 "bind": "127.0.0.1:8000",
@@ -99,7 +100,7 @@ const create = async (build_context: BuildContext) => {
             "type": "custom"
         };
     }
-    out_dfx_json["canisters"] = canister_node;
+    out_dfx_json.canisters = canister_node;
 
     logger.debug("creating package for each env");
     for (const env of build_context.envs) {
@@ -118,8 +119,8 @@ const create = async (build_context: BuildContext) => {
         fs.mkdirSync(env_assets_dir);
 
         // copy files from package_feature dir to env dir
-        const feature = env.feature;
-        const feature_dir = `${package_features_dir}/${feature}`;
+        const feature = env.canister_env;
+        const feature_dir = `${package_canister_env_dir}/${feature}`;
         const files = fs.readdirSync(feature_dir);
         for (const file of files) {
             fs.copyFileSync(`${feature_dir}/${file}`, `${env_assets_dir}/${file}`);
@@ -160,7 +161,7 @@ const create_zip = async (build_context: BuildContext) => {
 interface BuildContext {
     canisters: Map<string, DfxJsonCanister>
     envs: DfxPackageEnv[],
-    features: string[]
+    canister_envs: string[]
 }
 
 (async () => {
@@ -189,7 +190,7 @@ interface BuildContext {
     const build_context: BuildContext = {
         canisters: canisters as Map<string, DfxJsonCanister>,
         envs: dfxPackageJson.envs,
-        features: [...new Set(dfxPackageJson.envs.map(env => env.feature))]
+        canister_envs: [...new Set(dfxPackageJson.envs.map(env => env.canister_env))]
     };
     logger.debug(`build_context: ${JSON.stringify(build_context, null, 2)}`);
 
