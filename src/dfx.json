@@ -19,6 +19,11 @@
       "candid": "tokens/package/assets/dft_mintable.did",
       "wasm": "tokens/package/assets/dft_mintable.wasm",
       "type": "custom"
+    },
+    "registrar": {
+      "candid": "tokens/package/assets/registrar.did",
+      "wasm": "tokens/package/assets/registrar.wasm",
+      "type": "custom"
     }
   },
   "defaults": {

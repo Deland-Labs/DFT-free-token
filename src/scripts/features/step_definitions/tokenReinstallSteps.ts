@@ -8,11 +8,11 @@ import {
     createWUSDActor,
 } from "~/declarations";
 import {parseRawTableToJsonArray} from "~/utils/convert";
-import {identityFactory} from "~/utils/identity";
 import {createActor, defaultPVADecimals} from "./utils";
 import {get_id, get_principal} from "~/utils/canister";
 import * as math from "mathjs";
 import {Principal} from "@dfinity/principal";
+import {identities} from "~/utils/identity";
 
 
 interface DftInstallOption {
@@ -49,8 +49,8 @@ Given(/^Reinstall dft canisters$/, async (rawTable) => {
     defaultPVADecimals.setVolumeDecimals(Number(dftWUSDInitOptions?.decimals) ?? 0);
 
     const reinstallOptions: CanisterReinstallOptions = {
-            build: false,
-            init: false,
+            build: true,
+            init: true,
             one_by_one: false,
             canisters: {
                 token_WICP: dftWICPInitOptions ? {
@@ -86,7 +86,7 @@ Given(/^transfer token from "([^"]*)" to these users$/,
             const dftActor = createActor(item.token, user);
             if (dftActor && item) {
                 const decimals = await dftActor.decimals();
-                const to = identityFactory.getPrincipal(item.user)!.toText();
+                const to = identities.get_principal(item.user)!.toText();
                 const amountBN = parseToOrigin(math.evaluate(item.amount), decimals);
                 const res = await dftActor.transfer([], to, amountBN, []);
                 assert.isTrue('Ok' in res, `transfer failed: ${JSON.stringify(res)}`);
@@ -102,7 +102,7 @@ Given(/^owner "([^"]*)" set "([^"]*)" as fee_to$/, async function (owner, feeTo)
     const dftWICP = createWICPActor(owner);
     // const dftBurnAble = createDFTBurnableActor(owner);
     // const dftMintAble = createDFTMintableActor(owner);
-    const feeToPrincipal = identityFactory.getPrincipal(feeTo)!.toText();
+    const feeToPrincipal = identities.get_principal(feeTo)!.toText();
     logger.debug(`feeToPrincipal: ${feeToPrincipal}`);
     const dftActors = [dftWUSD, dftWICP];
     for (let i = 0; i < dftActors.length; i++) {
@@ -124,8 +124,8 @@ Given(/^owner "([^"]*)" set "([^"]*)" as fee_to$/, async function (owner, feeTo)
 
 const parseToDFTInitOptions = (option: DftInstallOption): DFTInitOptions => {
     logger.debug(`option is ${JSON.stringify(option)}`);
-    logger.debug(identityFactory.getPrincipal(option.owner)!.toText());
-    logger.debug(identityFactory.getIdentity(option.owner)!.identity.getPrincipal().toText());
+    logger.debug(identities.get_principal(option.owner)!.toText());
+    logger.debug(identities.get_principal(option.owner)!.toText());
     const decimals = parseInt(option.decimals);
     logger.debug(`decimals: ${option.decimals}`);
     const feeDecimals = parseInt(option.rate_decimals ?? '0');
@@ -141,7 +141,7 @@ const parseToDFTInitOptions = (option: DftInstallOption): DFTInitOptions => {
             rate_decimals: feeDecimals,
         },
         desc: [],
-        owner: identityFactory.getPrincipal(option.owner)!.toText(),
+        owner: identities.get_principal(option.owner)!.toText(),
         archive: Number(option.archive),
         threshold: Number(option.threshold),
     };
@@ -150,7 +150,7 @@ Then(/^check "([^"]*)" balance of "([^"]*)" is "([^"]*)"$/, async function (toke
     const dftActor = createActor(token, user);
     const decimals = await dftActor.decimals();
     const balanceBN = parseToOrigin(balance, decimals);
-    const res = await dftActor.balanceOf(identityFactory.getPrincipal(user)!.toText());
+    const res = await dftActor.balanceOf(identities.get_principal(user)!.toText());
     expect(res).to.equal(balanceBN);
 });
 Then(/^"([^"]*)" approve "([^"]*)" user "([^"]*)" value "([^"]*)"$/, async function (token, target_token, user, value) {

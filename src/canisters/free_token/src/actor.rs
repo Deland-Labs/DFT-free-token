@@ -16,9 +16,7 @@ use crate::TimeInNs;
 #[candid_method(init)]
 #[allow(clippy::too_many_arguments)]
 #[allow(clippy::clone_on_copy)]
-fn canister_init(mintable: Principal, amount: Nat, unlimited_users: Option<Vec<Principal>>) {
-    // let service = FreeTokenService::default();
-    // service.init(&mintable, amount, unlimited_users);
+fn canister_init() {
     log::set_logger(&ICLogger);
     log::set_max_level(LevelFilter::Trace);
     panic::set_hook(Box::new(|data| {
@@ -38,6 +36,8 @@ async fn receive_free_token(key: String) -> BooleanResult {
     result.into()
 }
 
+#[update(name = "add_reward")]
+#[candid_method(update)]
 async fn add_reward(
     reward_code: RewardCode,
     reward_package: RewardPackage,

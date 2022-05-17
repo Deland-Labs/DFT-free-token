@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 use candid::{Nat, Principal, CandidType, Deserialize, Error};
 
-#[derive(Debug, Clone, Eq, Hash, PartialEq)]
+#[derive(Debug, Clone, Eq, Hash, PartialEq, CandidType, Deserialize)]
 pub struct RewardCode(pub String);
 
 #[derive(Debug, Clone, Ord, PartialOrd, Eq, Hash, PartialEq, CandidType, Deserialize)]

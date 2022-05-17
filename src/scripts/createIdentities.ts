@@ -2,10 +2,11 @@ import "~/setup"
 
 import {canister} from "~/utils";
 import {addMainAsController} from "~/utils/canister";
-import {identityFactory} from "~/utils/identity";
 import logger from "node-color-log";
+import {create_identities, identities} from "~/utils/identity";
 
-identityFactory.loadAllIdentities();
+
+create_identities();
 // identities.json written to disk
 logger.debug("Identities created");
 

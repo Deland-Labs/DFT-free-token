@@ -2,9 +2,9 @@ import {exec} from "shelljs";
 import {Actor, CanisterInstallMode, HttpAgent} from "@dfinity/agent";
 import {DfxJsonCanister, get_dfx_json, get_wasm_path} from "./dfxJson";
 import * as fs from "fs";
-import {identityFactory} from "~/utils/identity";
 import logger from "node-color-log";
 import {Principal} from "@dfinity/principal";
+import {identities} from "~/utils/identity";
 
 
 export const create = (name: string) => {
@@ -113,7 +113,7 @@ export const reinstall_code = async (name: string, args?: ArrayBuffer) => {
     const wasmPath = get_wasm_path(canister);
     const buffer = fs.readFileSync(wasmPath);
     const canister_id = get_id(name);
-    const agent = new HttpAgent(identityFactory.getIdentity()!.agentOptions);
+    const agent = new HttpAgent(identities.main.agentOptions);
     await agent.fetchRootKey();
     await Actor.install({
         module: buffer,
@@ -128,7 +128,7 @@ export const reinstall_code = async (name: string, args?: ArrayBuffer) => {
 
 export const addMainAsController = async () => {
     // add main identity as controller of all canisters
-    const update_result = exec(`dfx canister update-settings --all --add-controller ${identityFactory.getPrincipal()}`);
+    const update_result = exec(`dfx canister update-settings --all --add-controller ${identities.main.principal_text}`);
     if (update_result.code !== 0) {
         throw new Error(update_result.stderr);
     }

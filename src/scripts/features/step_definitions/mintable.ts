@@ -2,10 +2,10 @@ import {DataTable, Given, Then, When} from "@cucumber/cucumber";
 import logger from "node-color-log";
 import {createMintableActor} from "~/declarations";
 import {parseToOrigin} from "~/utils/uint";
-import {identityFactory} from "~/utils/identity";
 import {createActor} from "./utils";
 import {expect} from "chai";
 import {principalToAccountID} from "~/utils/convert";
+import {identities} from "~/utils/identity";
 
 When(/^Owner "([^"]*)" mint to users$/, async function (owner, dataTable) {
 
@@ -15,7 +15,7 @@ When(/^Owner "([^"]*)" mint to users$/, async function (owner, dataTable) {
     const decimals = await mintActor.decimals();
     for (const target of target_data) {
         const {user, amount} = target;
-        const userId = identityFactory.getPrincipal(user)!.toText();
+        const userId = identities.get_principal(user)!.toText();
         const res = await mintActor.mint(userId, parseToOrigin(amount, decimals), []);
         logger.debug(res);
     }
@@ -27,7 +27,7 @@ Then(/^Check trade history$/, async function (dataTable) {
         const {user, token, amount} = target;
         const actor = createActor(token);
         const decimals = await actor.decimals();
-        const userId = identityFactory.getPrincipal(user)!.toText();
+        const userId = identities.get_principal(user)!.toText();
         const res = await actor.blocksByQuery(BigInt(0), BigInt(target_data.length));
         logger.debug(res);
     }
@@ -40,7 +40,7 @@ Then(/^Check "([^"]*)" mintable translation history$/, async function (token, da
     const validate = target_data.map(({user, amount}) => {
 
         return {
-            userId: principalToAccountID(identityFactory.getPrincipal(user)!),
+            userId: principalToAccountID(identities.get_principal(user)!),
             amount: parseToOrigin(amount, decimals)
         }
     });
