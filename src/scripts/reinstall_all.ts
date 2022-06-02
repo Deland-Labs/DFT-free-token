@@ -1,4 +1,3 @@
-import "~/setup"
 import {reinstall_all} from "./src/tasks"
 import logger from "node-color-log";
 

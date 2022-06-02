@@ -1,4 +1,3 @@
-import "./scripts/setup"
 import {reinstall as reinstallWICP} from "~/canisters/token_WICP";
 import {reinstall as reinstallWUSD} from "~/canisters/token_WUSD";
 import {reinstall as reinstallTokenMintable} from "~/canisters/token_mintable";
