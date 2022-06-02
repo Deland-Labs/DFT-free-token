@@ -1,8 +1,8 @@
+npm config set @deland-labs:registry https://www.myget.org/F/ic-feed/npm/
+npm install -g yarn tsconfig-paths
 npm install
-npm i typescript -g
-npm i ts-node -g
-npm i tsconfig-paths -g
-ts-node -r tsconfig-paths/register scripts/createIdentities.ts
-ts-node -r tsconfig-paths/register scripts/updateLocalConfigs.ts
+
+npx icdev init-identity
+npx ts-node -r tsconfig-paths/register scripts/index.ts update-local-config
 pre-commit install
 pipenv install

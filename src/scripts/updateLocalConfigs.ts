@@ -1,17 +1,16 @@
-import {canister} from "~/utils";
 import fs from "fs";
 import logger from "node-color-log";
-import {get_dfx_json} from "~/utils/dfxJson";
+import { dfxJson, canister } from "@deland-labs/ic-dev-kit";
 
 (async () => {
     await canister.createAll();
 
-    const dfx_json = get_dfx_json();
+    const dfx_json = dfxJson.get_dfx_json();
 
     const dir = `./env_configs`;
     // create dir if not exists
     if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, {recursive: true});
+        fs.mkdirSync(dir, { recursive: true });
     }
 
     let env_file_content = "";

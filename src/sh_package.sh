@@ -1,1 +1,4 @@
-ts-node -r tsconfig-paths/register scripts/create_package.ts
+npx icdev pack \
+    --package-scope deland-labs \
+    --canister-env-name EX3_CANISTER_ENV \
+    --production-canister-env production
