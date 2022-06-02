@@ -91,10 +91,6 @@ jobs:
       - uses: Swatinem/rust-cache@v1
         with:
           working-directory: "src"
-      - name: make sure dft_tx_storage build
-        run: |
-          cd $GITHUB_WORKSPACE/src
-          cargo build --target wasm32-unknown-unknown --package dft_tx_storage --release
       - name: Generate code coverage
         run: |
           cd $GITHUB_WORKSPACE/src
