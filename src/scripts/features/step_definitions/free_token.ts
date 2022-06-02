@@ -1,13 +1,12 @@
 import {DataTable, Given, Then, When} from "@cucumber/cucumber";
 import {assert_remote_result, createActor} from "./utils";
 import {Principal} from "@dfinity/principal";
-import {get_id, get_principal} from "~/utils/canister";
 import logger from "node-color-log";
 import {CanisterReinstallOptions, FreeTokenInitOptions, reinstall_all} from "../../src/tasks";
 import {createFreeTokenActor, createRegistrarActor} from "~/declarations"
 import {assert, expect} from "chai";
 import {QuotaType, RewardType} from "~/declarations/free_token/free_token.did";
-import {identities} from "~/utils/identity";
+import {identities, get_id, get_principal, uint} from "@deland-labs/ic-dev-kit";
 import * as math from "mathjs";
 
 
@@ -46,12 +45,12 @@ When(/^add reward token "([^"]*)" code "([^"]*)"$/, async function (canister, co
 
     const reward1: RewardType = {
         'TokenTransferRewardPackage': {
-            'canister': dftWICP, 'amount': parseToOrigin('1000', 0)
+            'canister': dftWICP, 'amount': uint.parseToOrigin('1000', 0)
         }
     };
     const reward2: RewardType = {
         'TokenMintRewardPackage': {
-            'canister': dftMint, 'amount': parseToOrigin('500', 0)
+            'canister': dftMint, 'amount': uint.parseToOrigin('500', 0)
         }
     };
     const reward3: RewardType = {
@@ -124,7 +123,7 @@ Given(/^transfer token from "([^"]*)" to canister$/, async function (admin, data
     for (const target of targetTable) {
         const dftActor = createActor(target.token, admin);
         const canister = get_id(target.canister);
-        const value = parseToOrigin(math.evaluate(target.amount), await dftActor.decimals());
+        const value = uint.parseToOrigin(math.evaluate(target.amount), await dftActor.decimals());
         const res = await dftActor.transfer([], canister, value, []);
         logger.debug(`transfer result: ${JSON.stringify(res)}`);
         expect("Ok" in res).to.equal(true);
@@ -143,12 +142,12 @@ When(/^add reward token "([^"]*)"$/, async function (canister, dataTable) {
 
         const reward1: RewardType = {
             'TokenTransferRewardPackage': {
-                'canister': dftWICP, 'amount': parseToOrigin(target.dicp_amount, 0)
+                'canister': dftWICP, 'amount': uint.parseToOrigin(target.dicp_amount, 0)
             }
         };
         const reward2: RewardType = {
             'TokenMintRewardPackage': {
-                'canister': dftMint, 'amount': parseToOrigin(target.mint_amount, 0)
+                'canister': dftMint, 'amount': uint.parseToOrigin(target.mint_amount, 0)
             }
         };
         const reward3: RewardType = {
