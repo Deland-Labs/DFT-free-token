@@ -2,6 +2,7 @@ import {reinstall as reinstallWICP} from "~/canisters/token_WICP";
 import {reinstall as reinstallWUSD} from "~/canisters/token_WUSD";
 import {reinstall as reinstallTokenMintable} from "~/canisters/token_mintable";
 import {reinstall as reinstallFreeToken} from "~/canisters/free_token";
+import {reinstall as reinstallRegistrar} from "~/canisters/registrar";
 
 
 export const reinstall_all = async (options?: CanisterReinstallOptions) => {
@@ -27,10 +28,15 @@ export const reinstall_all = async (options?: CanisterReinstallOptions) => {
                 yield  reinstallTokenMintable({...options,}, options.canisters.token_mintable.initOptions);
             }
             // free_token
-            if (options && options.canisters?.free_token?.reinstall) {
+            if (options && options.canisters?.free_token) {
                 yield reinstallFreeToken({
                     ...options,
-                }, options.canisters.free_token.initOptions);
+                });
+            }
+            if (options && options.canisters?.registrar) {
+                yield reinstallRegistrar({
+                    ...options,
+                });
             }
         }
 
@@ -95,7 +101,8 @@ export interface CanisterReinstallOptionsCanisters {
     token_WICP?: DFTInstallOptions;
     token_WUSD?: DFTInstallOptions;
     token_mintable?: DFTInstallOptions;
-    free_token?: FreeTokenInstallOptions;
+    free_token?: boolean;
+    registrar?: boolean;
 }
 
 export interface CanisterReinstallOptions {
