@@ -8,6 +8,9 @@
     },
     "token_mintable": {
       "exclude_in_package": true
+    },
+    "registrar": {
+      "exclude_in_package": true
     }
   },
   "envs": [
