@@ -1,9 +1,7 @@
-import "../setup"
-import {canister} from "../utils";
+import { canister } from "@deland-labs/ic-dev-kit";
 import {ReInstallOptions} from "~/utils/canister";
 import {DFTInitOptions, FreeTokenInitOptions} from "../../tasks";
 import logger from "node-color-log";
-import {defaultPVADecimals} from "../../../features/step_definitions/utils";
 
 const build = () => {
     canister.build("free_token");

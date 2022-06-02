@@ -1,10 +1,19 @@
 {
   "canisters": {
+    "token_WICP": {
+      "exlucde_in_package": true
+    },
+    "token_WUSD": {
+      "exlucde_in_package": true
+    },
+    "token_mintable": {
+      "exlucde_in_package": true
+    }
   },
   "envs": [
     {
-      "name": "local",
-      "feature": "dev_canister"
+      "name": "production",
+      "canister_env": "production"
     }
   ]
 }

@@ -1,0 +1,119 @@
+name: build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  create_dev_package:
+    runs-on: ubuntu-latest
+    container:
+      image: docker.io/kentsday/dfx_rust:bullseye-dfx-0.10.0-1
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: collect feature file names
+        id: set-features
+        run: |
+          # list features in $GITHUB_WORKSPACE/src/scripts/features without file extension
+          # join the filenames with quotes into a json array
+          # save result into env var FEATURES
+          # e.g. from nice.feature, nice_test.feature, nice_test_2.feature to ["nice.feature", "nice_test.feature", "nice_test_2.feature"]
+          cd $GITHUB_WORKSPACE/src/scripts/features
+          FEATURES=$(ls -1 *.feature | sed -e 's/\.feature//g' | tr '\n' ',' | sed -e 's/,$//g')
+          # append " to the beginning and end FEATURES
+          FEATURES="[\"$FEATURES\"]"
+          # replace , with ","
+          FEATURES=$(echo $FEATURES | sed -e 's/,/\",\"/g')
+          echo $FEATURES
+          echo "::set-output name=features::$FEATURES"
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+          cache: "npm"
+          cache-dependency-path: "src/package-lock.json"
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          target: "wasm32-unknown-unknown"
+      - uses: Swatinem/rust-cache@v1
+        with:
+          working-directory: "src"
+      - name: run package
+        run: |
+          cd $GITHUB_WORKSPACE/src
+          ./start_clean.sh
+          ./sh_setup_dev.sh
+
+          ./sh_package.sh
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: "dev"
+          path: src/package/dev/
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: |
+            src/package
+    outputs:
+      features: ${{ steps.set-features.outputs.features }}
+  it:
+    uses: ./.github/workflows/run_integration_test.yml
+    needs:
+      - create_dev_package
+    with:
+      features: ${{ needs.create_dev_package.outputs.features }}
+  unit_test:
+    runs-on: ubuntu-latest
+    container:
+      image: docker.io/kentsday/dfx_rust:bullseye-dfx-0.10.0-1
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+          cache: "npm"
+          cache-dependency-path: "src/package-lock.json"
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          profile: minimal
+          target: "wasm32-unknown-unknown"
+      - uses: Swatinem/rust-cache@v1
+        with:
+          working-directory: "src"
+      - name: make sure dft_tx_storage build
+        run: |
+          cd $GITHUB_WORKSPACE/src
+          cargo build --target wasm32-unknown-unknown --package dft_tx_storage --release
+      - name: Generate code coverage
+        run: |
+          cd $GITHUB_WORKSPACE/src
+          cargo llvm-cov nextest --all-features --workspace --lcov --output-path lcov.info
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          files: src/lcov.info
+          fail_ci_if_error: true
+  audit:
+    runs-on: ubuntu-latest
+    container:
+      image: docker.io/kentsday/dfx_rust:bullseye-dfx-0.10.0-1
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Cargo audit
+        run: |
+          cd $GITHUB_WORKSPACE/src
+          cargo audit

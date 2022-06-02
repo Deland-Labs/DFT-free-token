@@ -1,1 +1,1 @@
-ts-node -r tsconfig-paths/register scripts/updateDid.ts
+npx icdev update-did

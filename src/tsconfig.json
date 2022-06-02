@@ -3,12 +3,7 @@
     "noImplicitAny": false,
     "target": "es2021",
     "module": "esnext",
-    "lib": [
-      "dom",
-      "es2017",
-      "es2020.bigint"
-    ],
-    "tsBuildInfoFile": "./build_info.json",
+    "lib": ["dom", "es2017", "es2020.bigint"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -26,17 +21,8 @@
       "~/*": ["./scripts/src/scripts/*"]
     }
   },
-  "include": [
-    "scripts/src/scripts/**/*.ts",
-    "scripts/*.ts",
-    "scripts/features/step_definitions/*.ts"
- ],
-  "exclude": [
-    "node_modules/**/*",
-    ".webpack/**/*",
-    "_warmup/**/*",
-    ".vscode/**/*"
-  ],
+  "include": ["scripts/src/scripts/**/*.ts", "scripts/*.ts", "scripts/features/step_definitions/*.ts"],
+  "exclude": ["node_modules/**/*", ".webpack/**/*", "_warmup/**/*", ".vscode/**/*"],
   // Most ts-node options can be specified here using their programmatic names.
   "ts-node": {
     // It is faster to skip typechecking.
@@ -45,7 +31,7 @@
     "files": true,
     "compilerOptions": {
       "module": "commonjs",
-      "experimentalDecorators": true,
+      "experimentalDecorators": true
     }
   }
 }

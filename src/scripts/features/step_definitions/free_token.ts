@@ -1,43 +1,41 @@
-import {DataTable, Given, Then, When} from "@cucumber/cucumber";
-import {assert_remote_result, createActor} from "./utils";
-import {Principal} from "@dfinity/principal";
-import {get_id, get_principal} from "~/utils/canister";
+import { DataTable, Given, Then, When } from "@cucumber/cucumber";
+import { assert_remote_result, createActor } from "./utils";
+import { Principal } from "@dfinity/principal";
+import { canister, identity } from "@deland-labs/ic-dev-kit";
 import logger from "node-color-log";
-import {CanisterReinstallOptions, FreeTokenInitOptions, reinstall_all} from "../../src/tasks";
-import {createFreeTokenActor} from "~/declarations"
-import {expect} from "chai";
-import {identityFactory} from "~/utils/identity";
-
+import { CanisterReinstallOptions, FreeTokenInitOptions, reinstall_all } from "../../src/tasks";
+import { createFreeTokenActor } from "~/declarations";
+import { expect } from "chai";
 
 Given(/^Reinstall freeToken canisters$/, async function (dataTable) {
-
     const targetTable = dataTable.hashes();
 
-    const users: string[] = targetTable?.map(x => identityFactory.getPrincipal(x.user)) ?? [];
+    const users: string[] = targetTable?.map((x) => identity.identityFactory.getPrincipal(x.user)) ?? [];
     const freeTokenInitOptions: FreeTokenInitOptions = {
-        mintable: get_id('token_mintable'),
+        mintable: canister.get_id("token_mintable"),
         amount: BigInt(100),
         unlimitedUsers: [...new Set(users)],
-    }
+    };
 
     const reinstallOptions: CanisterReinstallOptions = {
-            build: false,
-            init: false,
-            one_by_one: false,
-            canisters: {
-                free_token: freeTokenInitOptions ? {
-                    reinstall: true,
-                    initOptions: freeTokenInitOptions
-                } : undefined,
-            }
-        }
-    ;
+        build: false,
+        init: false,
+        one_by_one: false,
+        canisters: {
+            free_token: freeTokenInitOptions
+                ? {
+                      reinstall: true,
+                      initOptions: freeTokenInitOptions,
+                  }
+                : undefined,
+        },
+    };
     await reinstall_all(reinstallOptions);
 });
 
 Given(/^mintable "([^"]*)" add minter "([^"]*)"$/, async function (minter, freeToken) {
     const mintActor = createActor(minter, "dft_main");
-    const freeTokenPrincipal = Principal.fromText(get_id(freeToken));
+    const freeTokenPrincipal = Principal.fromText(canister.get_id(freeToken));
     logger.debug(`freeTokenPrincipal: ${freeTokenPrincipal}`);
     const res = await mintActor.addMinter(freeTokenPrincipal, []);
 
