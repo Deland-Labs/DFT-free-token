@@ -25,8 +25,8 @@ Feature: FreeToken
   Scenario: FreeToken
     When mintable "token_mintable" add minter "free_token"
     When add reward token
-      | code     | quota_canister | len | diff | dicp_canister | dicp_amount | mint_canister  | mint_amount | user |
-      | reward_1 | registrar      | 3   | 5    | token_WICP    | 1000        | token_mintable | 1200        | main |
+      | code     | quota_canister | len | diff | dicp_canister | dicp_amount | mint_canister  | mint_amount | user          |
+      | reward_1 | registrar      | 3   | 5    | token_WICP    | 1000        | token_mintable | 1200        | icnaming_main |
     Then Users receive tokens for free code "reward_1"
       | user           |
       | icnaming_main  |
