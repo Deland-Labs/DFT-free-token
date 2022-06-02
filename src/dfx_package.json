@@ -1,13 +1,13 @@
 {
   "canisters": {
     "token_WICP": {
-      "exlucde_in_package": true
+      "exclude_in_package": true
     },
     "token_WUSD": {
-      "exlucde_in_package": true
+      "exclude_in_package": true
     },
     "token_mintable": {
-      "exlucde_in_package": true
+      "exclude_in_package": true
     }
   },
   "envs": [
