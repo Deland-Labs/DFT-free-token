@@ -4,11 +4,11 @@ import {createActor as createMintable} from "~/declarations/token_mintable";
 import {createActor as createFreeToken} from "~/declarations/free_token";
 import {createActor as createRegistrar} from "~/declarations/registrar";
 import logger from "node-color-log";
-import {get_id, identity} from '@deland-labs/ic-dev-kit'
+import {canister, identity} from '@deland-labs/ic-dev-kit'
 
 
 const createWICPActor = (user?: string) => {
-    const canisterId = get_id("token_WICP");
+    const canisterId = canister.get_id("token_WICP");
     if (user === undefined) {
         return createWICP(canisterId, {
             agentOptions: {host: identity.identityFactory.getDefaultHost()},
@@ -22,7 +22,7 @@ const createWICPActor = (user?: string) => {
 
 // create a dft_basic2 actor
 const createWUSDActor = (user?: string) => {
-    const canisterId = get_id("token_WUSD");
+    const canisterId = canister.get_id("token_WUSD");
     if (user === undefined) {
         return createWUSD(canisterId, {
             agentOptions: {host: identity.identityFactory.getDefaultHost()},
@@ -36,7 +36,7 @@ const createWUSDActor = (user?: string) => {
 
 
 const createMintableActor = (user?: string) => {
-    const canisterId = get_id("token_mintable");
+    const canisterId = canister.get_id("token_mintable");
     if (user === undefined) {
         return createMintable(canisterId, {
             agentOptions: {host: identity.identityFactory.getDefaultHost()},
@@ -49,7 +49,7 @@ const createMintableActor = (user?: string) => {
 };
 
 const createFreeTokenActor = (user?: string) => {
-    const canisterId = get_id("free_token");
+    const canisterId = canister.get_id("free_token");
     if (user === undefined) {
         return createFreeToken(canisterId, {
             agentOptions: {host: identity.identityFactory.getDefaultHost()},
@@ -61,13 +61,14 @@ const createFreeTokenActor = (user?: string) => {
     });
 };
 export const createRegistrarActor = (user?: string) => {
-    const canisterId = get_id('registrar');
+    const canisterId = canister.get_id('registrar');
     if (user === undefined) {
         return createRegistrar(canisterId, {
             agentOptions: {host: identity.identityFactory.getDefaultHost()},
         });
     }
     const identity_info = identity.identityFactory.getIdentity(user)!;
+    logger.debug(JSON.stringify(identity_info));
     return createRegistrar(canisterId, {
         agentOptions: identity_info.agentOptions,
     });

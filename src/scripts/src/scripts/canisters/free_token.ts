@@ -1,4 +1,3 @@
-import "../setup"
 import { ReInstallOptions} from "~/utils/canister";
 import {DFTInitOptions, FreeTokenInitOptions} from "../../tasks";
 import logger from "node-color-log";

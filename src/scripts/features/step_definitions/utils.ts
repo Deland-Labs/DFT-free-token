@@ -1,3 +1,4 @@
+import "./setup";
 import { DataTable, Given, Then, When } from "@cucumber/cucumber";
 import { reinstall_all } from "../../src/tasks";
 import { canister, unit } from "@deland-labs/ic-dev-kit";

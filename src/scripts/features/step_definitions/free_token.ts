@@ -1,3 +1,4 @@
+import "./setup";
 import {DataTable, Given, Then, When} from "@cucumber/cucumber";
 import {assert_remote_result, createActor} from "./utils";
 import {Principal} from "@dfinity/principal";
@@ -6,9 +7,8 @@ import {CanisterReinstallOptions, FreeTokenInitOptions, reinstall_all} from "../
 import {createFreeTokenActor, createRegistrarActor} from "~/declarations"
 import {assert, expect} from "chai";
 import {QuotaType, RewardType} from "~/declarations/free_token/free_token.did";
-import {identities, get_id, get_principal, uint} from "@deland-labs/ic-dev-kit";
+import {get_id, uint, identity, canister} from "@deland-labs/ic-dev-kit";
 import * as math from "mathjs";
-
 
 Given(/^Reinstall freeToken and registrar canisters$/, async function () {
 
@@ -27,7 +27,7 @@ Given(/^Reinstall freeToken and registrar canisters$/, async function () {
 
 Given(/^mintable "([^"]*)" add minter "([^"]*)"$/, async function (minter, freeToken) {
     const mintActor = createActor(minter, 'main');
-    const freeTokenPrincipal = Principal.fromText(get_id(freeToken));
+    const freeTokenPrincipal = Principal.fromText(canister.get_id(freeToken));
     logger.debug(`freeTokenPrincipal: ${freeTokenPrincipal}`);
     const res = await mintActor.addMinter(freeTokenPrincipal, []);
 
@@ -36,12 +36,12 @@ Given(/^mintable "([^"]*)" add minter "([^"]*)"$/, async function (minter, freeT
 When(/^add reward token "([^"]*)" code "([^"]*)"$/, async function (canister, code, dataTable) {
     const target_table = dataTable.hashes();
 
-    const users: Principal[] = target_table.map(target => identities.get_principal(target.user));
+    const users: Principal[] = target_table.map(target => identity.identityFactory.getPrincipal(target.user));
     const actor = createFreeTokenActor('main');
 
-    const dftWICP = Principal.fromText(get_id('token_WICP'));
-    const dftMint = Principal.fromText(get_id('token_mintable'));
-    const icnaming = Principal.fromText(get_id('registrar'));
+    const dftWICP = Principal.fromText(canister.get_id('token_WICP'));
+    const dftMint = Principal.fromText(canister.get_id('token_mintable'));
+    const icnaming = Principal.fromText(canister.get_id('registrar'));
 
     const reward1: RewardType = {
         'TokenTransferRewardPackage': {
@@ -80,9 +80,10 @@ Then(/^Users receive tokens for free code "([^"]*)"$/, async function (code, dat
         assert_remote_result(res);
     }
 });
-Given(/^give blind_box some quotas from "([^"]*)"$/, async function (user, dataTable) {
+Given(/^give free_token some quotas from "([^"]*)"$/, async function (user, dataTable) {
     const targetTable = dataTable.hashes();
-    const admin = identities.get_principal(user);
+    const admin = identity.identityFactory.getPrincipal(user);
+    logger.debug(`admin: ${admin.toText()}`);
 
     const icNamingActor = createRegistrarActor(user);
 
@@ -93,7 +94,7 @@ Given(/^give blind_box some quotas from "([^"]*)"$/, async function (user, dataT
         } else {
             quota = {LenGte: Number(target.len)};
         }
-        const result = await icNamingActor.add_quota(Principal.fromText(get_id('free_token'))!, quota, Number(target.diff));
+        const result = await icNamingActor.add_quota(Principal.fromText(canister.get_id('free_token'))!, quota, Number(target.diff));
         if ('Ok' in result) {
             logger.debug(JSON.stringify(result.Ok));
         } else {
@@ -122,7 +123,7 @@ Given(/^transfer token from "([^"]*)" to canister$/, async function (admin, data
     const targetTable = dataTable.hashes();
     for (const target of targetTable) {
         const dftActor = createActor(target.token, admin);
-        const canister = get_id(target.canister);
+        const canister = canister.get_id(target.canister);
         const value = uint.parseToOrigin(math.evaluate(target.amount), await dftActor.decimals());
         const res = await dftActor.transfer([], canister, value, []);
         logger.debug(`transfer result: ${JSON.stringify(res)}`);
@@ -133,12 +134,12 @@ When(/^add reward token "([^"]*)"$/, async function (canister, dataTable) {
     const target_table = dataTable.hashes();
 
     for (const target of target_table) {
-        const users: Principal[] = [identities.get_principal(target.user)];
+        const users: Principal[] = [identity.identityFactory.getPrincipal(target.user)];
         const actor = createFreeTokenActor('main');
 
-        const dftWICP = Principal.fromText(get_id(target.dicp_canister));
-        const dftMint = Principal.fromText(get_id(target.mint_canister));
-        const icnaming = Principal.fromText(get_id(target.quota_canister));
+        const dftWICP = Principal.fromText(canister.get_id(target.dicp_canister));
+        const dftMint = Principal.fromText(canister.get_id(target.mint_canister));
+        const icnaming = Principal.fromText(canister.get_id(target.quota_canister));
 
         const reward1: RewardType = {
             'TokenTransferRewardPackage': {

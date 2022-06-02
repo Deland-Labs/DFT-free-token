@@ -1,3 +1,4 @@
+import "./setup";
 import {DataTable, Given, Then, When} from "@cucumber/cucumber";
 import {assert, expect} from "chai";
 import logger from "node-color-log";
@@ -11,8 +12,7 @@ import * as math from "mathjs";
 import {Principal} from "@dfinity/principal";
 import {defaultPVADecimals} from "~/utils/PVADecimals";
 
-import {unit, identity, get_id, get_principal} from "@deland-labs/ic-dev-kit";
-
+import {unit, canister, identity, get_principal} from "@deland-labs/ic-dev-kit";
 
 interface DftInstallOption {
     key: string;
@@ -85,7 +85,7 @@ Given(/^transfer token from "([^"]*)" to these users$/,
             const dftActor = createActor(item.token, user);
             if (dftActor && item) {
                 const decimals = await dftActor.decimals();
-                const to = identity.get_principal(item.user)!.toText();
+                const to = identity.identityFactory.getPrincipal(item.user)!.toText();
                 const amountBN = unit.parseToOrigin(math.evaluate(item.amount), decimals);
                 const res = await dftActor.transfer([], to, amountBN, []);
                 assert.isTrue('Ok' in res, `transfer failed: ${JSON.stringify(res)}`);
@@ -101,7 +101,7 @@ Given(/^owner "([^"]*)" set "([^"]*)" as fee_to$/, async function (owner, feeTo)
     const dftWICP = createWICPActor(owner);
     // const dftBurnAble = createDFTBurnableActor(owner);
     // const dftMintAble = createDFTMintableActor(owner);
-    const feeToPrincipal = identity.get_principal(feeTo)!.toText();
+    const feeToPrincipal = identity.identityFactory.getPrincipal(feeTo)!.toText();
     logger.debug(`feeToPrincipal: ${feeToPrincipal}`);
     const dftActors = [dftWUSD, dftWICP];
     for (let i = 0; i < dftActors.length; i++) {
@@ -123,8 +123,8 @@ Given(/^owner "([^"]*)" set "([^"]*)" as fee_to$/, async function (owner, feeTo)
 
 const parseToDFTInitOptions = (option: DftInstallOption): DFTInitOptions => {
     logger.debug(`option is ${JSON.stringify(option)}`);
-    logger.debug(identity.get_principal(option.owner)!.toText());
-    logger.debug(identity.get_principal(option.owner)!.toText());
+    logger.debug(identity.identityFactory.getPrincipal(option.owner)!.toText());
+    logger.debug(identity.identityFactory.getPrincipal(option.owner)!.toText());
     const decimals = parseInt(option.decimals);
     logger.debug(`decimals: ${option.decimals}`);
     const feeDecimals = parseInt(option.rate_decimals ?? '0');
@@ -140,7 +140,7 @@ const parseToDFTInitOptions = (option: DftInstallOption): DFTInitOptions => {
             rate_decimals: feeDecimals,
         },
         desc: [],
-        owner: identity.get_principal(option.owner)!.toText(),
+        owner: identity.identityFactory.getPrincipal(option.owner)!.toText(),
         archive: Number(option.archive),
         threshold: Number(option.threshold),
     };
@@ -149,12 +149,12 @@ Then(/^check "([^"]*)" balance of "([^"]*)" is "([^"]*)"$/, async function (toke
     const dftActor = createActor(token, user);
     const decimals = await dftActor.decimals();
     const balanceBN = unit.parseToOrigin(balance, decimals);
-    const res = await dftActor.balanceOf(identity.get_principal(user)!.toText());
+    const res = await dftActor.balanceOf(identity.getPrincipal(user)!.toText());
     expect(res).to.equal(balanceBN);
 });
 Then(/^"([^"]*)" approve "([^"]*)" user "([^"]*)" value "([^"]*)"$/, async function (token, target_token, user, value) {
     const dftActor = createActor(token, user);
-    const target_canister = get_id(target_token);
+    const target_canister = canister.get_id(target_token);
     const valueBN = unit.parseToOrigin(value, await dftActor.decimals());
     const res = await dftActor.approve([], target_canister, valueBN, []);
     logger.debug(`approve result: ${JSON.stringify(res)}`);
@@ -162,8 +162,8 @@ Then(/^"([^"]*)" approve "([^"]*)" user "([^"]*)" value "([^"]*)"$/, async funct
 });
 When(/^Check "([^"]*)" user "([^"]*)" balance GT "([^"]*)"$/, async function (token, user, value) {
     const dftActor = createActor(token, user);
-    const balance = get_id("balance_keeper");
-    const dft = get_id(token);
+    const balance = canister.get_id("balance_keeper");
+    const dft = canister.get_id(token);
     const decimals = await dftActor.decimals();
     const valueBN = unit.parseToOrigin(value, decimals);
     const res = await dftActor.allowance(dft, balance);
