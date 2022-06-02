@@ -2,17 +2,18 @@ import {DataTable, Given, Then, When} from "@cucumber/cucumber";
 import {assert, expect} from "chai";
 import logger from "node-color-log";
 import {CanisterReinstallOptions, DFTInitOptions, Fee, reinstall_all} from "../../src/tasks";
-import {parseToOrigin} from "~/utils/uint";
 import {
     createWICPActor,
     createWUSDActor,
 } from "~/declarations";
-import {parseRawTableToJsonArray} from "~/utils/convert";
-import {createActor, defaultPVADecimals} from "./utils";
+import {createActor} from "./utils";
 import {get_id, get_principal} from "~/utils/canister";
 import * as math from "mathjs";
 import {Principal} from "@dfinity/principal";
 import {identities} from "~/utils/identity";
+import {defaultPVADecimals} from "~/utils/PVADecimals";
+
+import { unit } from "@deland-labs/ic-dev-kit";
 
 
 interface DftInstallOption {
@@ -87,7 +88,7 @@ Given(/^transfer token from "([^"]*)" to these users$/,
             if (dftActor && item) {
                 const decimals = await dftActor.decimals();
                 const to = identities.get_principal(item.user)!.toText();
-                const amountBN = parseToOrigin(math.evaluate(item.amount), decimals);
+                const amountBN = unit.parseToOrigin(math.evaluate(item.amount), decimals);
                 const res = await dftActor.transfer([], to, amountBN, []);
                 assert.isTrue('Ok' in res, `transfer failed: ${JSON.stringify(res)}`);
                 assert.equal(await dftActor.balanceOf(to), amountBN);
@@ -134,10 +135,10 @@ const parseToDFTInitOptions = (option: DftInstallOption): DFTInitOptions => {
         name: String(option.name),
         symbol: String(option.symbol),
         decimals: BigInt(decimals),
-        totalSupply: parseToOrigin(math.evaluate(option.total_supply), decimals),
+        totalSupply: unit.parseToOrigin(math.evaluate(option.total_supply), decimals),
         fee: {
-            minimum: Number(parseToOrigin(option.fee_minimum ?? '0', decimals)),
-            rate: Number(parseToOrigin(option.fee_rate ?? '0', feeDecimals)),
+            minimum: Number(unit.parseToOrigin(option.fee_minimum ?? '0', decimals)),
+            rate: Number(unit.parseToOrigin(option.fee_rate ?? '0', feeDecimals)),
             rate_decimals: feeDecimals,
         },
         desc: [],
@@ -149,14 +150,14 @@ const parseToDFTInitOptions = (option: DftInstallOption): DFTInitOptions => {
 Then(/^check "([^"]*)" balance of "([^"]*)" is "([^"]*)"$/, async function (token, user, balance) {
     const dftActor = createActor(token, user);
     const decimals = await dftActor.decimals();
-    const balanceBN = parseToOrigin(balance, decimals);
+    const balanceBN = unit.parseToOrigin(balance, decimals);
     const res = await dftActor.balanceOf(identities.get_principal(user)!.toText());
     expect(res).to.equal(balanceBN);
 });
 Then(/^"([^"]*)" approve "([^"]*)" user "([^"]*)" value "([^"]*)"$/, async function (token, target_token, user, value) {
     const dftActor = createActor(token, user);
     const target_canister = get_id(target_token);
-    const valueBN = parseToOrigin(value, await dftActor.decimals());
+    const valueBN = unit.parseToOrigin(value, await dftActor.decimals());
     const res = await dftActor.approve([], target_canister, valueBN, []);
     logger.debug(`approve result: ${JSON.stringify(res)}`);
     expect("Ok" in res).to.equal(true);
@@ -166,7 +167,7 @@ When(/^Check "([^"]*)" user "([^"]*)" balance GT "([^"]*)"$/, async function (to
     const balance = get_id("balance_keeper");
     const dft = get_id(token);
     const decimals = await dftActor.decimals();
-    const valueBN = parseToOrigin(value, decimals);
+    const valueBN = unit.parseToOrigin(value, decimals);
     const res = await dftActor.allowance(dft, balance);
     logger.debug(`res: ${res}`);
     //expect(res as bigint).to.equal(valueBN);

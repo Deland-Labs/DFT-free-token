@@ -7,7 +7,6 @@ import {CanisterReinstallOptions, FreeTokenInitOptions, reinstall_all} from "../
 import {createFreeTokenActor, createRegistrarActor} from "~/declarations"
 import {assert, expect} from "chai";
 import {QuotaType, RewardType} from "~/declarations/free_token/free_token.did";
-import {parseToOrigin} from "~/utils/uint";
 import {identities} from "~/utils/identity";
 import * as math from "mathjs";
 

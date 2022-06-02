@@ -1,11 +1,10 @@
 import {DataTable, Given, Then, When} from "@cucumber/cucumber";
 import logger from "node-color-log";
 import {createMintableActor} from "~/declarations";
-import {parseToOrigin} from "~/utils/uint";
 import {createActor} from "./utils";
 import {expect} from "chai";
-import {principalToAccountID} from "~/utils/convert";
 import {identities} from "~/utils/identity";
+import { unit } from "@deland-labs/ic-dev-kit";
 
 When(/^Owner "([^"]*)" mint to users$/, async function (owner, dataTable) {
 
@@ -16,7 +15,7 @@ When(/^Owner "([^"]*)" mint to users$/, async function (owner, dataTable) {
     for (const target of target_data) {
         const {user, amount} = target;
         const userId = identities.get_principal(user)!.toText();
-        const res = await mintActor.mint(userId, parseToOrigin(amount, decimals), []);
+        const res = await mintActor.mint(userId, unit.parseToOrigin(amount, decimals), []);
         logger.debug(res);
     }
 });
@@ -41,7 +40,7 @@ Then(/^Check "([^"]*)" mintable translation history$/, async function (token, da
 
         return {
             userId: principalToAccountID(identities.get_principal(user)!),
-            amount: parseToOrigin(amount, decimals)
+            amount: unit.parseToOrigin(amount, decimals)
         }
     });
 
