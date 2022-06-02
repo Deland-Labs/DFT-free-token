@@ -7,7 +7,7 @@ import {CanisterReinstallOptions, FreeTokenInitOptions, reinstall_all} from "../
 import {createFreeTokenActor, createRegistrarActor} from "~/declarations"
 import {assert, expect} from "chai";
 import {QuotaType, RewardType} from "~/declarations/free_token/free_token.did";
-import {get_id, uint, identity, canister} from "@deland-labs/ic-dev-kit";
+import {get_id, unit, identity, canister} from "@deland-labs/ic-dev-kit";
 import * as math from "mathjs";
 
 Given(/^Reinstall freeToken and registrar canisters$/, async function () {
@@ -26,7 +26,7 @@ Given(/^Reinstall freeToken and registrar canisters$/, async function () {
 });
 
 Given(/^mintable "([^"]*)" add minter "([^"]*)"$/, async function (minter, freeToken) {
-    const mintActor = createActor(minter, 'main');
+    const mintActor = createActor(minter, 'icnaming_main');
     const freeTokenPrincipal = Principal.fromText(canister.get_id(freeToken));
     logger.debug(`freeTokenPrincipal: ${freeTokenPrincipal}`);
     const res = await mintActor.addMinter(freeTokenPrincipal, []);
@@ -37,7 +37,7 @@ When(/^add reward token "([^"]*)" code "([^"]*)"$/, async function (canister, co
     const target_table = dataTable.hashes();
 
     const users: Principal[] = target_table.map(target => identity.identityFactory.getPrincipal(target.user));
-    const actor = createFreeTokenActor('main');
+    const actor = createFreeTokenActor('icnaming_main');
 
     const dftWICP = Principal.fromText(canister.get_id('token_WICP'));
     const dftMint = Principal.fromText(canister.get_id('token_mintable'));
@@ -45,12 +45,12 @@ When(/^add reward token "([^"]*)" code "([^"]*)"$/, async function (canister, co
 
     const reward1: RewardType = {
         'TokenTransferRewardPackage': {
-            'canister': dftWICP, 'amount': uint.parseToOrigin('1000', 0)
+            'canister': dftWICP, 'amount': unit.parseToOrigin('1000', 0)
         }
     };
     const reward2: RewardType = {
         'TokenMintRewardPackage': {
-            'canister': dftMint, 'amount': uint.parseToOrigin('500', 0)
+            'canister': dftMint, 'amount': unit.parseToOrigin('500', 0)
         }
     };
     const reward3: RewardType = {
@@ -123,19 +123,19 @@ Given(/^transfer token from "([^"]*)" to canister$/, async function (admin, data
     const targetTable = dataTable.hashes();
     for (const target of targetTable) {
         const dftActor = createActor(target.token, admin);
-        const canister = canister.get_id(target.canister);
-        const value = uint.parseToOrigin(math.evaluate(target.amount), await dftActor.decimals());
-        const res = await dftActor.transfer([], canister, value, []);
+        const canisterId = canister.get_id(target.canister);
+        const value = unit.parseToOrigin(math.evaluate(target.amount), await dftActor.decimals());
+        const res = await dftActor.transfer([], canisterId, value, []);
         logger.debug(`transfer result: ${JSON.stringify(res)}`);
         expect("Ok" in res).to.equal(true);
     }
 });
-When(/^add reward token "([^"]*)"$/, async function (canister, dataTable) {
+When(/^add reward token$/, async function (dataTable) {
     const target_table = dataTable.hashes();
 
     for (const target of target_table) {
         const users: Principal[] = [identity.identityFactory.getPrincipal(target.user)];
-        const actor = createFreeTokenActor('main');
+        const actor = createFreeTokenActor('icnaming_main');
 
         const dftWICP = Principal.fromText(canister.get_id(target.dicp_canister));
         const dftMint = Principal.fromText(canister.get_id(target.mint_canister));
@@ -143,12 +143,12 @@ When(/^add reward token "([^"]*)"$/, async function (canister, dataTable) {
 
         const reward1: RewardType = {
             'TokenTransferRewardPackage': {
-                'canister': dftWICP, 'amount': uint.parseToOrigin(target.dicp_amount, 0)
+                'canister': dftWICP, 'amount': unit.parseToOrigin(target.dicp_amount, 0)
             }
         };
         const reward2: RewardType = {
             'TokenMintRewardPackage': {
-                'canister': dftMint, 'amount': uint.parseToOrigin(target.mint_amount, 0)
+                'canister': dftMint, 'amount': unit.parseToOrigin(target.mint_amount, 0)
             }
         };
         const reward3: RewardType = {
