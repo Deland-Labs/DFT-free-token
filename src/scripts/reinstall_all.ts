@@ -1,7 +1,9 @@
 import {reinstall_all} from "./src/tasks"
 import logger from "node-color-log";
+import { exec } from "child_process";
 
 (async () => {
+    exec("npx icdev install-canister")
     await reinstall_all({
         build: true,
         init: true,

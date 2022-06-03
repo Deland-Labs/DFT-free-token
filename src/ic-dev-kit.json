@@ -2,5 +2,55 @@
   "identity": {
     "pem_source_dir": "./ic-dev-kit/pem/",
     "default_identity": "default"
+  },
+  "install_canisters": {
+    "token_WICP": {
+      "package": "@deland-labs/dft_all_features_server",
+      "install": {
+        "parameter": {
+          "name": "W ICP ",
+          "symbol": "WICP",
+          "decimals": 0,
+          "total_supply": "1000000000",
+          "fee": {
+            "rate": 0,
+            "minimum": "0",
+            "rateDecimals": 0
+          }
+        }
+      }
+    },
+    "token_WUSD": {
+      "package": "@deland-labs/dft_all_features_server",
+      "install": {
+        "parameter": {
+          "name": "W USD ",
+          "symbol": "WUSD",
+          "decimals": 0,
+          "total_supply": "1000000000",
+          "fee": {
+            "rate": 0,
+            "minimum": "0",
+            "rateDecimals": 0
+          }
+        }
+      }
+    },
+    "token_mintable": {
+      "package": "@deland-labs/dft_mintable_server",
+      "install": {
+        "parameter": {
+          "name": "W MIT ",
+          "symbol": "WMIT",
+          "decimals": 0,
+          "total_supply": "1000000000",
+          "fee": {
+            "rate": 0,
+            "minimum": "0",
+            "rateDecimals": 0
+          }
+        }
+      }
+    }
   }
 }

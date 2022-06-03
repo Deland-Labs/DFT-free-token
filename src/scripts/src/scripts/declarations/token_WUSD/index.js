@@ -1,10 +1,10 @@
 import {Actor, HttpAgent} from "@dfinity/agent";
 
 // Imports and re-exports candid interface
-import {idlFactory} from './token_WUSD.did.js';
+import {idlFactory} from '@deland-labs/dft_all_features_client';
 import logger from "node-color-log";
 
-export {idlFactory} from './token_WUSD.did.js';
+export {idlFactory} from '@deland-labs/dft_all_features_client';
 // CANISTER_ID is replaced by webpack based on node environment
 export const canisterId = process.env.DFT_BASIC_CANISTER_ID;
 

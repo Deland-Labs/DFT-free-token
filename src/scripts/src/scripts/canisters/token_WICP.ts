@@ -1,4 +1,4 @@
-import { canister } from "@deland-labs/ic-dev-kit";
+import { canister, canisterInit } from "@deland-labs/ic-dev-kit";
 import { ReInstallOptions } from "~/utils/canister";
 import { DFTInitOptions } from "../../tasks";
 import logger from "node-color-log";
@@ -17,6 +17,7 @@ export const reinstall = async (options?: ReInstallOptions, initOption?: DFTInit
     if (options?.build) {
         build();
     }
+
     const name = initOption?.name ?? "W ICP ";
     const symbol = initOption?.symbol ?? "WICP";
     const decimals = initOption?.decimals ?? 18;

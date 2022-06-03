@@ -5,25 +5,25 @@
       "package": "free_token",
       "candid": "canisters/free_token/src/free_token.did"
     },
-    "token_WICP": {
-      "candid": "tokens/package/assets/dft_basic.did",
-      "wasm": "tokens/package/assets/dft_basic.wasm",
-      "type": "custom"
-    },
-    "token_WUSD": {
-      "candid": "tokens/package/assets/dft_basic.did",
-      "wasm": "tokens/package/assets/dft_basic.wasm",
-      "type": "custom"
-    },
-    "token_mintable": {
-      "candid": "tokens/package/assets/dft_mintable.did",
-      "wasm": "tokens/package/assets/dft_mintable.wasm",
-      "type": "custom"
-    },
     "registrar": {
       "candid": "tokens/package/assets/registrar.did",
       "wasm": "tokens/package/assets/registrar.wasm",
       "type": "custom"
+    },
+    "token_WICP": {
+      "type": "custom",
+      "candid": "node_modules/@deland-labs/dft_all_features_server/index.did",
+      "wasm": "node_modules/@deland-labs/dft_all_features_server/index.wasm"
+    },
+    "token_WUSD": {
+      "type": "custom",
+      "candid": "node_modules/@deland-labs/dft_all_features_server/index.did",
+      "wasm": "node_modules/@deland-labs/dft_all_features_server/index.wasm"
+    },
+    "token_mintable": {
+      "type": "custom",
+      "candid": "node_modules/@deland-labs/dft_mintable_server/index.did",
+      "wasm": "node_modules/@deland-labs/dft_mintable_server/index.wasm"
     }
   },
   "defaults": {
