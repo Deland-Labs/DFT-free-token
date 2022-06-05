@@ -1,6 +1,6 @@
 use crate::canister_api::OperationResult;
 use crate::ic_logger::ICLogger;
-use crate::permissions::{ErrorInfo, MintError};
+use crate::permissions::{ErrorInfo, FreeTokenError};
 use crate::reward_store::{RewardCode, RewardPackage};
 use crate::service::{CommonResult, FreeTokenService};
 use crate::state::State;
@@ -9,6 +9,7 @@ use candid::{candid_method, CandidType, Deserialize, Nat, Principal};
 use ic_cdk::api;
 use ic_cdk_macros::*;
 use log::{debug, logger, LevelFilter};
+use std::collections::HashMap;
 use std::panic;
 use yansi::Paint;
 
@@ -55,10 +56,9 @@ async fn add_reward(
 
 #[query(name = "get_rewards")]
 #[candid_method(query)]
-async fn get_rewards() -> CommonResult<Vec<RewardPackage>> {
-    let caller = api::caller();
+fn get_rewards() -> RewardsResult {
     let service = FreeTokenService::default();
-    let result = service.get_rewards(&caller).await;
+    let result = service.get_rewards();
     result.into()
 }
 
@@ -73,6 +73,20 @@ impl From<CommonResult<bool>> for BooleanResult {
         match result {
             Ok(value) => BooleanResult::Ok(value),
             Err(error) => BooleanResult::Err(error.into()),
+        }
+    }
+}
+#[derive(CandidType, Debug, Deserialize)]
+pub enum RewardsResult {
+    Ok(HashMap<RewardCode, RewardPackage>),
+    Err(ErrorInfo),
+}
+
+impl From<CommonResult<HashMap<RewardCode, RewardPackage>>> for RewardsResult {
+    fn from(result: CommonResult<HashMap<RewardCode, RewardPackage>>) -> Self {
+        match result {
+            Ok(value) => RewardsResult::Ok(value),
+            Err(error) => RewardsResult::Err(error.into()),
         }
     }
 }

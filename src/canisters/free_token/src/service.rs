@@ -1,6 +1,8 @@
 use crate::canister_api::api_impl::{DFTApi, ICNamingApi};
 use crate::canister_api::{IDFTApi, IICNamingApi, OperationResult};
-use crate::permissions::{must_not_anonymous, ActorResult, ErrorInfo, MintError};
+use crate::permissions::{
+    must_be_system_owner, must_not_anonymous, ActorResult, ErrorInfo, FreeTokenError,
+};
 use crate::received_reward_store::ReceivesRewardRecord;
 use crate::reward_store::{RewardCode, RewardPackage, RewardType};
 use crate::state::{State, TransactionId, User, STATE};
@@ -58,10 +60,10 @@ impl FreeTokenService {
         });
         Ok(true)
     }
-    pub fn get_rewards(&self) -> CommonResult<Vec<RewardPackage>> {
+    pub fn get_rewards(&self) -> CommonResult<HashMap<RewardCode, RewardPackage>> {
         STATE.with(|state| {
             let reward_store = state.reward_store.borrow();
-            Ok(reward_store.)
+            Ok(reward_store.get_rewards().clone())
         })
     }
 
@@ -72,7 +74,7 @@ impl FreeTokenService {
         reward_package: RewardPackage,
         unlimited_users: Option<Vec<Principal>>,
     ) -> CommonResult<(bool)> {
-        let user = &must_not_anonymous(user)?;
+        let user = &must_be_system_owner(user)?;
         STATE.with(|state| {
             let mut reward_store = state.reward_store.borrow_mut();
             let mut unlimited_user_store = state.unlimited_user_store.borrow_mut();
@@ -143,4 +145,4 @@ impl FreeTokenService {
     }
 }
 
-pub type CommonResult<T> = anyhow::Result<T, MintError>;
+pub type CommonResult<T> = anyhow::Result<T, FreeTokenError>;
