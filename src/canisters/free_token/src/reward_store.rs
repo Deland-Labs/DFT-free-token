@@ -33,10 +33,10 @@ impl RewardStore {
         self.rewards.insert(code, package);
     }
 
-    pub fn get_rewards(&self) -> &HashMap<RewardCode, RewardPackage> {
+    pub fn get_reward_packages(&self) -> &HashMap<RewardCode, RewardPackage> {
         &self.rewards
     }
-    pub fn get_reward(&self, code: &RewardCode) -> Option<&RewardPackage> {
+    pub fn get_reward_package(&self, code: &RewardCode) -> Option<&RewardPackage> {
         self.rewards.get(code)
     }
 

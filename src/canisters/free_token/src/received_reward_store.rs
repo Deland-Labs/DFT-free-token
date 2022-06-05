@@ -1,9 +1,9 @@
-use std::collections::HashMap;
-use std::fmt::Debug;
-use candid::{Principal, CandidType, Deserialize};
 use crate::reward_store::{RewardCode, RewardStore, RewardType};
 use crate::state::User;
 use crate::TimeInNs;
+use candid::{CandidType, Deserialize, Principal};
+use std::collections::HashMap;
+use std::fmt::Debug;
 
 #[cfg(test)]
 mod tests;
@@ -11,7 +11,6 @@ mod tests;
 #[derive(Default)]
 pub struct ReceivedRewardRecordStore {
     received_reward_records: HashMap<RewardCode, HashMap<User, ReceivesRewardRecord>>,
-
 }
 
 impl ReceivedRewardRecordStore {
@@ -20,14 +19,23 @@ impl ReceivedRewardRecordStore {
             received_reward_records: HashMap::new(),
         }
     }
-    pub fn add_received_reward_record(&mut self, user: User, reward_code: RewardCode, received_reward_record: ReceivesRewardRecord) {
+    pub fn add_received_reward_record(
+        &mut self,
+        user: User,
+        reward_code: RewardCode,
+        received_reward_record: ReceivesRewardRecord,
+    ) {
         self.received_reward_records
             .entry(reward_code)
             .or_insert_with(HashMap::new)
             .insert(user, received_reward_record);
     }
 
-    pub fn get_received_reward_record(&self, reward_code: &RewardCode, user: &User) -> Option<&ReceivesRewardRecord> {
+    pub fn get_received_reward_record(
+        &self,
+        reward_code: &RewardCode,
+        user: &User,
+    ) -> Option<&ReceivesRewardRecord> {
         self.received_reward_records
             .get(reward_code)
             .and_then(|user_reward_records| user_reward_records.get(user))
@@ -41,8 +49,30 @@ impl ReceivedRewardRecordStore {
             .unwrap_or(true)
     }
 
-    pub fn update_received_reward_record(&mut self, user: User, reward_code: RewardCode, received_reward_record: &ReceivesRewardRecord) {
+    pub fn update_received_reward_record(
+        &mut self,
+        user: User,
+        reward_code: RewardCode,
+        received_reward_record: &ReceivesRewardRecord,
+    ) {
         self.add_received_reward_record(user, reward_code, received_reward_record.clone());
+    }
+
+    pub fn get_user_received_reward_records(
+        &self,
+        user: &User,
+    ) -> HashMap<RewardCode, ReceivesRewardRecord> {
+        let mut hashmap: HashMap<RewardCode, ReceivesRewardRecord> = HashMap::new();
+
+        for (reward_code, received_reward_record) in self.received_reward_records.iter() {
+            if received_reward_record.contains_key(user) {
+                hashmap.insert(
+                    reward_code.clone(),
+                    received_reward_record.get(user).unwrap().clone(),
+                );
+            }
+        }
+        hashmap
     }
 }
 
@@ -58,9 +88,11 @@ pub struct ReceivesRewardRecord {
     created_at: TimeInNs,
 }
 
-
 impl ReceivesRewardRecord {
-    pub fn new(rewards: HashMap<RewardType, ReceivesRewardRecordState>, created_at: TimeInNs) -> Self {
+    pub fn new(
+        rewards: HashMap<RewardType, ReceivesRewardRecordState>,
+        created_at: TimeInNs,
+    ) -> Self {
         Self {
             rewards,
             created_at,
@@ -70,15 +102,16 @@ impl ReceivesRewardRecord {
         self.rewards.keys().cloned().collect()
     }
     pub fn set_reward_state_completed(&mut self, reward_type: &RewardType) {
-        self.rewards.insert(reward_type.clone(), ReceivesRewardRecordState::Completed);
+        self.rewards
+            .insert(reward_type.clone(), ReceivesRewardRecordState::Completed);
     }
 
     pub fn is_state_all_completed(&self) -> bool {
-        self.rewards.values().all(|reward_state| {
-            match reward_state {
+        self.rewards
+            .values()
+            .all(|reward_state| match reward_state {
                 ReceivesRewardRecordState::Completed => true,
                 _ => false,
-            }
-        })
+            })
     }
 }

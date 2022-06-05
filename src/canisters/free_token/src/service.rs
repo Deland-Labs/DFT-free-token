@@ -60,10 +60,10 @@ impl FreeTokenService {
         });
         Ok(true)
     }
-    pub fn get_rewards(&self) -> CommonResult<HashMap<RewardCode, RewardPackage>> {
+    pub fn get_reward_packages(&self) -> CommonResult<HashMap<RewardCode, RewardPackage>> {
         STATE.with(|state| {
             let reward_store = state.reward_store.borrow();
-            Ok(reward_store.get_rewards().clone())
+            Ok(reward_store.get_reward_packages().clone())
         })
     }
 
@@ -88,6 +88,29 @@ impl FreeTokenService {
         });
 
         Ok(true)
+    }
+
+    pub fn get_reward_package(&self, code: &RewardCode) -> CommonResult<RewardPackage> {
+        STATE.with(|state| {
+            let reward_store = state.reward_store.borrow();
+            let package = reward_store.get_reward_package(code);
+            if package.is_none() {
+                Err(FreeTokenError::RewardCodeNotAvailable.into())
+            } else {
+                Ok(package.unwrap().clone())
+            }
+        })
+    }
+    pub fn history(
+        &self,
+        user: &Principal,
+    ) -> CommonResult<HashMap<RewardCode, ReceivesRewardRecord>> {
+        let user = &must_not_anonymous(user)?;
+        STATE.with(|state| {
+            let received_reward_record_store = state.received_reward_record_store.borrow();
+            let records = received_reward_record_store.get_user_received_reward_records(user);
+            Ok(records.clone())
+        })
     }
 
     pub async fn send_reward(

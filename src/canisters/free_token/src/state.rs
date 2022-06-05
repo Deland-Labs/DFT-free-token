@@ -72,7 +72,7 @@ impl State {
         let state = self;
         let mut received_reward_record_store = state.received_reward_record_store.borrow_mut();
         let reward_store = state.reward_store.borrow();
-        let reward_package = reward_store.get_reward(reward_code);
+        let reward_package = reward_store.get_reward_package(reward_code);
         if reward_package.is_none() {
             return Err(FreeTokenError::RewardCodeNotAvailable).into();
         }

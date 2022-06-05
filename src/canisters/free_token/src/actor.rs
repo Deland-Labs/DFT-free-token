@@ -1,6 +1,7 @@
 use crate::canister_api::OperationResult;
 use crate::ic_logger::ICLogger;
 use crate::permissions::{ErrorInfo, FreeTokenError};
+use crate::received_reward_store::ReceivesRewardRecord;
 use crate::reward_store::{RewardCode, RewardPackage};
 use crate::service::{CommonResult, FreeTokenService};
 use crate::state::State;
@@ -54,14 +55,30 @@ async fn add_reward(
     result.into()
 }
 
-#[query(name = "get_rewards")]
+#[query(name = "get_reward_packages")]
 #[candid_method(query)]
-fn get_rewards() -> RewardsResult {
+fn get_rewards() -> RewardPackagesResult {
     let service = FreeTokenService::default();
-    let result = service.get_rewards();
+    let result = service.get_reward_packages();
     result.into()
 }
 
+#[query(name = "get_reward_package")]
+#[candid_method(query)]
+fn get_reward(reward_code: RewardCode) -> RewardPackageResult {
+    let service = FreeTokenService::default();
+    let result = service.get_reward_package(&reward_code);
+    result.into()
+}
+
+#[query(name = "history")]
+#[candid_method(query)]
+fn history() -> HistoryResult {
+    let caller = api::caller();
+    let service = FreeTokenService::default();
+    let result = service.history(&caller);
+    result.into()
+}
 #[derive(CandidType, Debug, Deserialize)]
 pub enum BooleanResult {
     Ok(bool),
@@ -77,16 +94,45 @@ impl From<CommonResult<bool>> for BooleanResult {
     }
 }
 #[derive(CandidType, Debug, Deserialize)]
-pub enum RewardsResult {
+pub enum RewardPackagesResult {
     Ok(HashMap<RewardCode, RewardPackage>),
     Err(ErrorInfo),
 }
 
-impl From<CommonResult<HashMap<RewardCode, RewardPackage>>> for RewardsResult {
+impl From<CommonResult<HashMap<RewardCode, RewardPackage>>> for RewardPackagesResult {
     fn from(result: CommonResult<HashMap<RewardCode, RewardPackage>>) -> Self {
         match result {
-            Ok(value) => RewardsResult::Ok(value),
-            Err(error) => RewardsResult::Err(error.into()),
+            Ok(value) => RewardPackagesResult::Ok(value),
+            Err(error) => RewardPackagesResult::Err(error.into()),
+        }
+    }
+}
+#[derive(CandidType, Debug, Deserialize)]
+pub enum RewardPackageResult {
+    Ok(RewardPackage),
+    Err(ErrorInfo),
+}
+
+impl From<CommonResult<RewardPackage>> for RewardPackageResult {
+    fn from(result: CommonResult<RewardPackage>) -> Self {
+        match result {
+            Ok(value) => RewardPackageResult::Ok(value),
+            Err(error) => RewardPackageResult::Err(error.into()),
+        }
+    }
+}
+
+#[derive(CandidType, Debug, Deserialize)]
+pub enum HistoryResult {
+    Ok(HashMap<RewardCode, ReceivesRewardRecord>),
+    Err(ErrorInfo),
+}
+
+impl From<CommonResult<HashMap<RewardCode, ReceivesRewardRecord>>> for HistoryResult {
+    fn from(result: CommonResult<HashMap<RewardCode, ReceivesRewardRecord>>) -> Self {
+        match result {
+            Ok(value) => HistoryResult::Ok(value),
+            Err(error) => HistoryResult::Err(error.into()),
         }
     }
 }
