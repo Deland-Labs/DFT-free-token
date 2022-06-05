@@ -1,6 +1,6 @@
+use candid::{CandidType, Deserialize, Error, Nat, Principal};
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
-use candid::{Nat, Principal, CandidType, Deserialize, Error};
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq, CandidType, Deserialize)]
 pub struct RewardCode(pub String);
@@ -33,6 +33,9 @@ impl RewardStore {
         self.rewards.insert(code, package);
     }
 
+    pub fn get_rewards(&self) -> &HashMap<RewardCode, RewardPackage> {
+        &self.rewards
+    }
     pub fn get_reward(&self, code: &RewardCode) -> Option<&RewardPackage> {
         self.rewards.get(code)
     }
@@ -62,7 +65,6 @@ pub enum RewardType {
         amount: Nat,
     },
 }
-
 
 /// Quota type to be used for registration
 #[derive(Deserialize, Copy, CandidType, Clone, Hash, Eq, PartialEq, Debug, Ord, PartialOrd)]

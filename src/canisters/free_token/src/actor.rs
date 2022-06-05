@@ -1,16 +1,16 @@
 use crate::canister_api::OperationResult;
 use crate::ic_logger::ICLogger;
 use crate::permissions::{ErrorInfo, MintError};
+use crate::reward_store::{RewardCode, RewardPackage};
 use crate::service::{CommonResult, FreeTokenService};
 use crate::state::State;
+use crate::TimeInNs;
 use candid::{candid_method, CandidType, Deserialize, Nat, Principal};
 use ic_cdk::api;
 use ic_cdk_macros::*;
 use log::{debug, logger, LevelFilter};
 use std::panic;
 use yansi::Paint;
-use crate::reward_store::{RewardCode, RewardPackage};
-use crate::TimeInNs;
 
 #[init]
 #[candid_method(init)]
@@ -32,7 +32,9 @@ async fn receive_free_token(key: String) -> BooleanResult {
     let now = api::time();
     let service = FreeTokenService::default();
 
-    let result = service.receive_free_token(&caller, &RewardCode(key), TimeInNs(now)).await;
+    let result = service
+        .receive_free_token(&caller, &RewardCode(key), TimeInNs(now))
+        .await;
     result.into()
 }
 
@@ -45,10 +47,20 @@ async fn add_reward(
 ) -> BooleanResult {
     let caller = api::caller();
     let service = FreeTokenService::default();
-    let result = service.add_reward(&caller, reward_code, reward_package, unlimited_users).await;
+    let result = service
+        .add_reward(&caller, reward_code, reward_package, unlimited_users)
+        .await;
     result.into()
 }
 
+#[query(name = "get_rewards")]
+#[candid_method(query)]
+async fn get_rewards() -> CommonResult<Vec<RewardPackage>> {
+    let caller = api::caller();
+    let service = FreeTokenService::default();
+    let result = service.get_rewards(&caller).await;
+    result.into()
+}
 
 #[derive(CandidType, Debug, Deserialize)]
 pub enum BooleanResult {
