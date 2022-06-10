@@ -60,7 +60,11 @@ impl FreeTokenService {
         });
         Ok(true)
     }
-    pub fn get_reward_packages(&self) -> CommonResult<HashMap<RewardCode, RewardPackage>> {
+    pub fn get_reward_packages(
+        &self,
+        user: &Principal,
+    ) -> CommonResult<HashMap<RewardCode, RewardPackage>> {
+        must_not_anonymous(user)?;
         STATE.with(|state| {
             let reward_store = state.reward_store.borrow();
             Ok(reward_store.get_reward_packages().clone())

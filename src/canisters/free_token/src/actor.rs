@@ -29,13 +29,13 @@ fn canister_init() {
 
 #[update(name = "receive_free_token")]
 #[candid_method(update)]
-async fn receive_free_token(key: String) -> BooleanResult {
+async fn receive_free_token(reward_code: RewardCode) -> BooleanResult {
     let caller = api::caller();
     let now = api::time();
     let service = FreeTokenService::default();
 
     let result = service
-        .receive_free_token(&caller, &RewardCode(key), TimeInNs(now))
+        .receive_free_token(&caller, &reward_code, TimeInNs(now))
         .await;
     result.into()
 }
@@ -58,8 +58,9 @@ async fn add_reward(
 #[query(name = "get_reward_packages")]
 #[candid_method(query)]
 fn get_rewards() -> RewardPackagesResult {
+    let caller = api::caller();
     let service = FreeTokenService::default();
-    let result = service.get_reward_packages();
+    let result = service.get_reward_packages(&caller);
     result.into()
 }
 
