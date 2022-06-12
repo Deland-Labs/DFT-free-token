@@ -1,9 +1,25 @@
 import type { Principal } from '@dfinity/principal';
+import type { ActorMethod } from '@dfinity/agent';
+
 export type BooleanResult = { 'Ok' : boolean } |
   { 'Err' : ErrorInfo };
 export interface ErrorInfo { 'code' : number, 'message' : string }
+export type HistoryResult = { 'Ok' : Array<[string, ReceivesRewardRecord]> } |
+  { 'Err' : ErrorInfo };
 export type QuotaType = { 'LenEq' : number } |
   { 'LenGte' : number };
+export interface ReceivesRewardRecord {
+  'created_at' : bigint,
+  'rewards' : Array<[RewardType, ReceivesRewardRecordState]>,
+}
+export type ReceivesRewardRecordState = { 'Sending' : null } |
+  { 'Completed' : null };
+export type RewardPackageResult = { 'Ok' : Array<RewardType> } |
+  { 'Err' : ErrorInfo };
+export type RewardPackagesResult = {
+    'Ok' : Array<[string, Array<RewardType>]>
+  } |
+  { 'Err' : ErrorInfo };
 export type RewardType = {
     'TokenTransferRewardPackage' : { 'canister' : Principal, 'amount' : bigint }
   } |
@@ -16,10 +32,12 @@ export type RewardType = {
     }
   };
 export interface _SERVICE {
-  'add_reward' : (
-      arg_0: string,
-      arg_1: Array<RewardType>,
-      arg_2: [] | [Array<Principal>],
-    ) => Promise<BooleanResult>,
-  'receive_free_token' : (arg_0: string) => Promise<BooleanResult>,
+  'add_reward' : ActorMethod<
+    [string, Array<RewardType>, [] | [Array<Principal>]],
+    BooleanResult,
+  >,
+  'get_reward' : ActorMethod<[string], RewardPackageResult>,
+  'get_rewards' : ActorMethod<[], RewardPackagesResult>,
+  'history' : ActorMethod<[], HistoryResult>,
+  'receive_free_token' : ActorMethod<[string], BooleanResult>,
 }

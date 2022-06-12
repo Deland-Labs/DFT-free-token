@@ -1,6 +1,20 @@
 type BooleanResult = variant { Ok : bool; Err : ErrorInfo };
 type ErrorInfo = record { code : nat32; message : text };
+type HistoryResult = variant {
+  Ok : vec record { text; ReceivesRewardRecord };
+  Err : ErrorInfo;
+};
 type QuotaType = variant { LenEq : nat8; LenGte : nat8 };
+type ReceivesRewardRecord = record {
+  created_at : nat64;
+  rewards : vec record { RewardType; ReceivesRewardRecordState };
+};
+type ReceivesRewardRecordState = variant { Sending; Completed };
+type RewardPackageResult = variant { Ok : vec RewardType; Err : ErrorInfo };
+type RewardPackagesResult = variant {
+  Ok : vec record { text; vec RewardType };
+  Err : ErrorInfo;
+};
 type RewardType = variant {
   TokenTransferRewardPackage : record { canister : principal; amount : nat };
   TokenMintRewardPackage : record { canister : principal; amount : nat };
@@ -12,5 +26,8 @@ type RewardType = variant {
 };
 service : () -> {
   add_reward : (text, vec RewardType, opt vec principal) -> (BooleanResult);
+  get_reward : (text) -> (RewardPackageResult) query;
+  get_rewards : () -> (RewardPackagesResult) query;
+  history : () -> (HistoryResult) query;
   receive_free_token : (text) -> (BooleanResult);
 }
