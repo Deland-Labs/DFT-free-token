@@ -57,7 +57,7 @@ async fn add_reward(
 
 #[query(name = "get_reward_packages")]
 #[candid_method(query)]
-fn get_rewards() -> RewardPackagesResult {
+fn get_reward_packages() -> RewardPackagesResult {
     let caller = api::caller();
     let service = FreeTokenService::default();
     let result = service.get_reward_packages(&caller);
@@ -66,7 +66,7 @@ fn get_rewards() -> RewardPackagesResult {
 
 #[query(name = "get_reward_package")]
 #[candid_method(query)]
-fn get_reward(reward_code: RewardCode) -> RewardPackageResult {
+fn get_reward_package(reward_code: RewardCode) -> RewardPackageResult {
     let service = FreeTokenService::default();
     let result = service.get_reward_package(&reward_code);
     result.into()
