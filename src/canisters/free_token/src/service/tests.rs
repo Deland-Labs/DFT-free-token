@@ -1,17 +1,17 @@
-use std::borrow::BorrowMut;
-use std::collections::HashMap;
 use crate::actor::BooleanResult;
 use crate::canister_api::tests::*;
 use crate::canister_api::OperationResult;
+use crate::reward_store::{QuotaType, RewardCode, RewardPackage, RewardType};
 use crate::service::FreeTokenService;
+use crate::state::{User, STATE};
+use crate::TimeInNs;
 use candid::{Nat, Principal};
-use rstest::*;
-use std::sync::Arc;
 use log::LevelFilter;
 use pretty_env_logger::env_logger;
-use crate::reward_store::{QuotaType, RewardCode, RewardPackage, RewardType};
-use crate::state::{STATE, User};
-use crate::TimeInNs;
+use rstest::*;
+use std::borrow::BorrowMut;
+use std::collections::HashMap;
+use std::sync::Arc;
 
 pub fn mock_user(index: u32) -> Principal {
     let mut principal_bytes = vec![0u8; 29];
@@ -31,7 +31,6 @@ pub fn init_test_logger() {
 pub fn init_test() {
     init_test_logger();
 }
-
 
 #[fixture]
 pub fn mock_user1() -> Principal {
@@ -116,12 +115,12 @@ pub fn reward_package_type() -> Vec<RewardType> {
 #[fixture]
 pub fn reward_package_store_1() -> HashMap<RewardCode, RewardPackage> {
     let mut hashmap = HashMap::new();
-    hashmap.entry(RewardCode(String::from("reward_code_1")))
+    hashmap
+        .entry(RewardCode(String::from("reward_code_1")))
         .or_insert_with(|| RewardPackage::new(reward_package_type()));
 
     return hashmap;
 }
-
 
 #[fixture]
 fn service(
@@ -143,7 +142,8 @@ fn service(
         let mut unlimited_user_store = s.unlimited_user_store.borrow_mut();
         for (code, reward_package) in reward_package_store_1.into_iter() {
             reward_store.add_reward(code.clone(), reward_package);
-            unlimited_user_store.add_unlimited_user(code.clone(), vec![User(mock_user4), User(mock_user3)]);
+            unlimited_user_store
+                .add_unlimited_user(code.clone(), vec![User(mock_user4), User(mock_user3)]);
         }
     });
     let mut service = FreeTokenService::default();
@@ -164,9 +164,8 @@ fn service(
                 panic!("Unexpected reward type");
             }
         });
-    mock_dft_api
-        .expect_transfer()
-        .returning(move |canister, from_sub_account, user, value, created_at| {
+    mock_dft_api.expect_transfer().returning(
+        move |canister, from_sub_account, user, value, created_at| {
             if let RewardType::TokenTransferRewardPackage {
                 canister: canister_expect,
                 amount: amount_expect,
@@ -180,7 +179,8 @@ fn service(
             } else {
                 panic!("Unexpected reward type");
             }
-        });
+        },
+    );
     mock_icnaming_api
         .expect_transfer_quota()
         .returning(move |canister, user, quota_type, diff| {
@@ -205,10 +205,10 @@ fn service(
 }
 
 mod ensure_received_reward_package_1 {
+    use super::*;
     use crate::permissions::MintError;
     use crate::state::User;
     use crate::TimeInNs;
-    use super::*;
 
     #[rstest]
     async fn test_ensure_received_reward_package_1(
@@ -217,10 +217,15 @@ mod ensure_received_reward_package_1 {
         reward_package_store_1: HashMap<RewardCode, RewardPackage>,
         mock_now: u64,
     ) {
-        let record_types = reward_package_store_1.values().next().unwrap().reward_types();
+        let record_types = reward_package_store_1
+            .values()
+            .next()
+            .unwrap()
+            .reward_types();
         let code = reward_package_store_1.keys().next().unwrap();
         let result = service
-            .receive_free_token(&mock_user1, &code, TimeInNs(mock_now)).await;
+            .receive_free_token(&mock_user1, &code, TimeInNs(mock_now))
+            .await;
         match result {
             Ok(b) => {
                 assert_eq!(b, true);
@@ -236,10 +241,15 @@ mod ensure_received_reward_package_1 {
         reward_package_store_1: HashMap<RewardCode, RewardPackage>,
         mock_now: u64,
     ) {
-        let record_types = reward_package_store_1.values().next().unwrap().reward_types();
+        let record_types = reward_package_store_1
+            .values()
+            .next()
+            .unwrap()
+            .reward_types();
         let code = reward_package_store_1.keys().next().unwrap();
         let result = service
-            .receive_free_token(&mock_user1, &code, TimeInNs(mock_now)).await;
+            .receive_free_token(&mock_user1, &code, TimeInNs(mock_now))
+            .await;
         match result {
             Ok(res) => {
                 assert_eq!(res, true);
@@ -247,14 +257,14 @@ mod ensure_received_reward_package_1 {
             Err(e) => panic!("{:?}", e),
         }
         let result = service
-            .receive_free_token(&mock_user1, &code, TimeInNs(mock_now)).await;
+            .receive_free_token(&mock_user1, &code, TimeInNs(mock_now))
+            .await;
         match result {
             Ok(res) => {
                 panic!("should failed");
             }
             Err(e) => assert_eq!(e, MintError::RewardAlreadyReceived),
         }
-
     }
 
     #[rstest]
@@ -264,10 +274,15 @@ mod ensure_received_reward_package_1 {
         reward_package_store_1: HashMap<RewardCode, RewardPackage>,
         mock_now: u64,
     ) {
-        let record_types = reward_package_store_1.values().next().unwrap().reward_types();
+        let record_types = reward_package_store_1
+            .values()
+            .next()
+            .unwrap()
+            .reward_types();
         let code = reward_package_store_1.keys().next().unwrap();
         let result = service
-            .receive_free_token(&mock_user3, code, TimeInNs(mock_now)).await;
+            .receive_free_token(&mock_user3, code, TimeInNs(mock_now))
+            .await;
         match result {
             Ok(res) => {
                 assert_eq!(res, true);
@@ -275,13 +290,13 @@ mod ensure_received_reward_package_1 {
             Err(e) => panic!("{:?}", e),
         }
         let result = service
-            .receive_free_token(&mock_user3, code, TimeInNs(mock_now)).await;
+            .receive_free_token(&mock_user3, code, TimeInNs(mock_now))
+            .await;
         match result {
             Ok(res) => {
                 assert_eq!(res, true);
             }
             Err(e) => panic!("{:?}", e),
         }
-
     }
 }

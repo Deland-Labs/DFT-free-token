@@ -1,5 +1,7 @@
 use crate::permissions::{ActorResult, ErrorInfo};
-use crate::state::{STATE};
+use crate::reward_store::{QuotaType, RewardPackage, RewardType};
+use crate::state::STATE;
+use crate::TimeInNs;
 use async_trait::async_trait;
 use candid::utils::{ArgumentDecoder, ArgumentEncoder};
 use candid::{decode_args, encode_args, CandidType, Nat, Principal};
@@ -9,12 +11,10 @@ use log::{debug, error};
 use serde::Deserialize;
 use std::fmt::{Debug, Display};
 use std::future::Future;
-use crate::reward_store::{QuotaType, RewardPackage, RewardType};
-use crate::TimeInNs;
 
+pub mod api_impl;
 #[cfg(test)]
 pub mod tests;
-pub mod api_impl;
 
 #[async_trait]
 pub trait IICNamingApi {
@@ -26,23 +26,40 @@ pub trait IICNamingApi {
         diff: u32,
     ) -> ActorResult<bool>;
 
-    async fn batch_transfer_quota(&self, canister: &Principal, request: BatchTransferRequest) -> ActorResult<bool>;
+    async fn batch_transfer_quota(
+        &self,
+        canister: &Principal,
+        request: BatchTransferRequest,
+    ) -> ActorResult<bool>;
 
-    async fn transfer_from_quota(&self, canister: &Principal, request: TransferFromQuotaRequest)
-                                 -> ActorResult<bool>;
+    async fn transfer_from_quota(
+        &self,
+        canister: &Principal,
+        request: TransferFromQuotaRequest,
+    ) -> ActorResult<bool>;
 
-    async fn approve(&self, canister: &Principal, name: String, to: Principal) -> ActorResult<bool>;
+    async fn approve(&self, canister: &Principal, name: String, to: Principal)
+        -> ActorResult<bool>;
 
-    async fn transfer(&self, canister: &Principal, name: String, new_owner: Principal) -> ActorResult<bool>;
+    async fn transfer(
+        &self,
+        canister: &Principal,
+        name: String,
+        new_owner: Principal,
+    ) -> ActorResult<bool>;
 
     async fn transfer_from(&self, canister: &Principal, name: String) -> ActorResult<bool>;
 }
 
-
 #[async_trait]
 pub trait IDFTApi {
-    async fn mint(&self, canister: &Principal, user: &Principal, created_at: Option<TimeInNs>, value: Nat)
-                  -> ActorResult<OperationResult>;
+    async fn mint(
+        &self,
+        canister: &Principal,
+        user: &Principal,
+        created_at: Option<TimeInNs>,
+        value: Nat,
+    ) -> ActorResult<OperationResult>;
     async fn transfer(
         &self,
         canister: &Principal,
@@ -76,15 +93,14 @@ impl From<OperationResult> for bool {
     }
 }
 
-
 async fn call_canister_as_actor_result<T, TResult>(
     canister_id: &Principal,
     method: &str,
     args: T,
 ) -> ActorResult<TResult>
-    where
-        T: candid::utils::ArgumentEncoder + Debug,
-        TResult: for<'a> Deserialize<'a> + CandidType + Debug,
+where
+    T: candid::utils::ArgumentEncoder + Debug,
+    TResult: for<'a> Deserialize<'a> + CandidType + Debug,
 {
     let result = call_core::<T, ActorResult<TResult>>(&canister_id, method, args, true).await;
     match result {
@@ -99,14 +115,14 @@ async fn call_core<T, TResult>(
     args: T,
     logging: bool,
 ) -> Result<TResult, ErrorInfo>
-    where
-        T: candid::utils::ArgumentEncoder + Debug,
-        TResult: for<'a> Deserialize<'a> + CandidType + Debug,
+where
+    T: candid::utils::ArgumentEncoder + Debug,
+    TResult: for<'a> Deserialize<'a> + CandidType + Debug,
 {
     if logging {
         debug!("Calling {}::{} {:?}", canister_id, method, args);
     }
-    let call_result: Result<(TResult, ), (RejectionCode, String)> =
+    let call_result: Result<(TResult,), (RejectionCode, String)> =
         call(*canister_id, method, args).await;
     if call_result.is_err() {
         let (code, message) = call_result.err().unwrap();
@@ -134,7 +150,7 @@ pub fn call<T: ArgumentEncoder, R: for<'a> ArgumentDecoder<'a>>(
     id: Principal,
     method: &str,
     args: T,
-) -> impl Future<Output=CallResult<R>> {
+) -> impl Future<Output = CallResult<R>> {
     let args_raw = encode_args(args).expect("Failed to encode arguments.");
     let fut = call_raw(id, method, &args_raw, 0);
     async {
@@ -183,7 +199,6 @@ pub struct TransferQuotaDetails {
     pub quota_type: QuotaType,
     pub diff: u32,
 }
-
 
 pub type Subaccount = [u8; 32];
 pub type TransactionId = String;

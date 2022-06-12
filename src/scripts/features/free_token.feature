@@ -76,4 +76,3 @@ Feature: FreeToken
       | reward_1 |
       | reward_2 |
     Then check user
-

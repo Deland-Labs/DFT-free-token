@@ -1,8 +1,11 @@
 use super::*;
-use candid::{Nat, Principal};
-use crate::canister_api::{BatchTransferRequest, call, call_canister_as_actor_result, IDFTApi, IICNamingApi, OperationResult, Subaccount, TransferFromQuotaRequest};
+use crate::canister_api::{
+    call, call_canister_as_actor_result, BatchTransferRequest, IDFTApi, IICNamingApi,
+    OperationResult, Subaccount, TransferFromQuotaRequest,
+};
 use crate::permissions::{ActorResult, ErrorInfo};
 use crate::reward_store::QuotaType;
+use candid::{Nat, Principal};
 
 #[derive(Debug, Default)]
 pub struct ICNamingApi {}
@@ -19,8 +22,12 @@ impl IICNamingApi for ICNamingApi {
         call_canister_as_actor_result(canister, "transfer_quota", (to, quota_type, diff)).await
     }
 
-    async fn batch_transfer_quota(&self, canister: &Principal, request: BatchTransferRequest) -> ActorResult<bool> {
-        call_canister_as_actor_result(canister, "batch_transfer_quota", (request, )).await
+    async fn batch_transfer_quota(
+        &self,
+        canister: &Principal,
+        request: BatchTransferRequest,
+    ) -> ActorResult<bool> {
+        call_canister_as_actor_result(canister, "batch_transfer_quota", (request,)).await
     }
 
     async fn transfer_from_quota(
@@ -28,21 +35,30 @@ impl IICNamingApi for ICNamingApi {
         canister: &Principal,
         request: TransferFromQuotaRequest,
     ) -> ActorResult<bool> {
-        call_canister_as_actor_result(canister, "transfer_from_quota", (request, )).await
+        call_canister_as_actor_result(canister, "transfer_from_quota", (request,)).await
     }
-    async fn approve(&self, canister: &Principal, name: String, to: Principal) -> ActorResult<bool> {
+    async fn approve(
+        &self,
+        canister: &Principal,
+        name: String,
+        to: Principal,
+    ) -> ActorResult<bool> {
         call_canister_as_actor_result(canister, "approve", (name, to)).await
     }
 
-    async fn transfer(&self, canister: &Principal, name: String, new_owner: Principal) -> ActorResult<bool> {
+    async fn transfer(
+        &self,
+        canister: &Principal,
+        name: String,
+        new_owner: Principal,
+    ) -> ActorResult<bool> {
         call_canister_as_actor_result(canister, "transfer", (name, new_owner)).await
     }
 
     async fn transfer_from(&self, canister: &Principal, name: String) -> ActorResult<bool> {
-        call_canister_as_actor_result(canister, "transfer_from", (name, )).await
+        call_canister_as_actor_result(canister, "transfer_from", (name,)).await
     }
 }
-
 
 #[derive(Debug, Default)]
 pub struct DFTApi {}
@@ -56,12 +72,7 @@ impl IDFTApi for DFTApi {
         created_at: Option<TimeInNs>,
         amount: Nat,
     ) -> ActorResult<OperationResult> {
-        call_canister_as_actor_result(
-            canister,
-            "mint",
-            (user.to_text(), amount, created_at),
-        )
-            .await
+        call_canister_as_actor_result(canister, "mint", (user.to_text(), amount, created_at)).await
     }
 
     async fn approve(
@@ -77,7 +88,7 @@ impl IDFTApi for DFTApi {
             "approve",
             (owner_sub_account, spender, value, created_at),
         )
-            .await
+        .await
     }
     async fn transfer(
         &self,
@@ -92,6 +103,6 @@ impl IDFTApi for DFTApi {
             "transfer",
             (from_sub_account, to, value, created_at),
         )
-            .await
+        .await
     }
 }
