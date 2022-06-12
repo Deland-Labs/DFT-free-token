@@ -55,6 +55,7 @@ Feature: FreeToken
       | icnaming_user1 |
       | icnaming_user2 |
 
+  @dev
   Scenario: FreeToken History
     When mintable "token_mintable" add minter "free_token"
     When add reward token
@@ -75,4 +76,7 @@ Feature: FreeToken
       | reward   |
       | reward_1 |
       | reward_2 |
-    Then check user
+    Then check reward is available
+      | reward   |
+      | reward_1 |
+      | reward_2 |

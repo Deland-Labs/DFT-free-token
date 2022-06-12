@@ -167,9 +167,37 @@ When(/^add reward token$/, async function (dataTable) {
         logger.debug(`add reward result: ${JSON.stringify(res)}`);
     }
 });
-Then(/^check user "([^"]*)" reward history$/, function (user, dataTable) {
+Then(/^check user "([^"]*)" reward history$/, async function (user, dataTable) {
     const actor = createFreeTokenActor(user);
     const target_table = dataTable.hashes();
-    const rewardHistory = actor.history;
+    const result = await actor.history();
 
+    if ('Ok' in result) {
+        const history = result.Ok;
+        for (const target of target_table) {
+            if (history.find(item => {
+                return item[0] === target.reward;
+            }) === undefined) {
+                assert(false, `expect reward ${target.reward} but not found`);
+            }
+        }
+    } else {
+        assert(false, JSON.stringify(result.Err));
+        assert(false, "get history failed");
+    }
+
+});
+Then(/^check reward is available$/, async function (dataTable) {
+    const actor = createFreeTokenActor();
+    const target_table = dataTable.hashes();
+
+    for (const target of target_table) {
+        const result = await actor.get_reward(target.reward);
+        if ('Ok' in result) {
+            logger.debug(JSON.stringify(result.Ok));
+        } else {
+            assert(false, JSON.stringify(result.Err));
+            assert(false, "get reward failed");
+        }
+    }
 });
