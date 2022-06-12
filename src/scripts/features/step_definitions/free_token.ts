@@ -74,7 +74,9 @@ Then(/^Users receive tokens for free code "([^"]*)"$/, async function (code, dat
     logger.debug(`target_table: ${JSON.stringify(target_table)}`);
     for (const target of target_table) {
         const actor = createFreeTokenActor(target.user);
-        const res = await actor!.receive_free_token(code);
+        const res = await actor!.receive_free_token({
+            'code': code
+        });
         logger.debug(`freeToken result: ${JSON.stringify(res)}`);
 
         assert_remote_result(res);
