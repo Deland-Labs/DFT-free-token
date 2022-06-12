@@ -67,8 +67,6 @@ mock! {
 
 }
 
-
-
 #[fixture]
 pub fn mock_dft_api() -> MockDFTApi {
     MockDFTApi::default()

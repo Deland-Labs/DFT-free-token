@@ -1,20 +1,27 @@
-use crate::state::{STATE, User};
+use crate::canister_api::OperationResult;
+use crate::constants::FREE_TOKEN_PRINCIPAL_NAME_ADMIN;
+use crate::state::{User, STATE};
 use candid::{CandidType, Deserialize, Principal};
 use std::borrow::Borrow;
 use thiserror::Error;
-use crate::canister_api::OperationResult;
-
 
 pub fn must_not_anonymous(caller: &Principal) -> DexServiceResult<User> {
     if *caller == Principal::anonymous() {
-        return Err(MintError::Unauthorized);
+        return Err(FreeTokenError::Unauthorized);
     }
     Ok(User(caller.clone()))
 }
 
+pub fn must_be_system_owner(caller: &Principal) -> DexServiceResult<()> {
+    must_not_anonymous(caller)?;
+    if !is_admin(caller) {
+        return Err(FreeTokenError::Unauthorized);
+    }
+    Ok(())
+}
 
 #[derive(Debug, Clone, Ord, PartialOrd, Eq, PartialEq, CandidType, Deserialize, Error)]
-pub enum MintError {
+pub enum FreeTokenError {
     #[error("there is a unknown error raised")]
     Unknown,
     #[error("error from remote, {0:?}")]
@@ -36,39 +43,39 @@ pub enum MintError {
     RewardCodeNotAvailable,
 }
 
-impl MintError {
+impl FreeTokenError {
     pub(crate) fn code(&self) -> u32 {
         match self {
-            MintError::Unknown => 1,
-            MintError::RemoteError(_) => 2,
-            MintError::Unauthorized => 3,
-            MintError::RewardAlreadyReceived => 4,
-            MintError::CanisterCallError { .. } => 5,
-            MintError::UnknownMintable => 6,
-            MintError::RewardIncomplete => 7,
-            MintError::RewardCodeNotAvailable => 8,
+            FreeTokenError::Unknown => 1,
+            FreeTokenError::RemoteError(_) => 2,
+            FreeTokenError::Unauthorized => 3,
+            FreeTokenError::RewardAlreadyReceived => 4,
+            FreeTokenError::CanisterCallError { .. } => 5,
+            FreeTokenError::UnknownMintable => 6,
+            FreeTokenError::RewardIncomplete => 7,
+            FreeTokenError::RewardCodeNotAvailable => 8,
         }
     }
 }
 
-pub fn get_error_code(error: MintError) -> ErrorInfo {
+pub fn get_error_code(error: FreeTokenError) -> ErrorInfo {
     ErrorInfo {
         code: error.code(),
         message: error.to_string(),
     }
 }
 
-pub type DexServiceResult<T> = anyhow::Result<T, MintError>;
+pub type DexServiceResult<T> = anyhow::Result<T, FreeTokenError>;
 
-impl From<MintError> for ErrorInfo {
-    fn from(error: MintError) -> Self {
+impl From<FreeTokenError> for ErrorInfo {
+    fn from(error: FreeTokenError) -> Self {
         get_error_code(error)
     }
 }
 
-impl From<ErrorInfo> for MintError {
+impl From<ErrorInfo> for FreeTokenError {
     fn from(error: ErrorInfo) -> Self {
-        MintError::RemoteError(error)
+        FreeTokenError::RemoteError(error)
     }
 }
 
@@ -81,4 +88,9 @@ pub struct ErrorInfo {
     pub code: u32,
     /// Error message
     pub message: String,
+}
+
+pub fn is_admin(user: &Principal) -> bool {
+    let admin = Principal::from_text(FREE_TOKEN_PRINCIPAL_NAME_ADMIN).unwrap();
+    user == &admin
 }

@@ -1,24 +1,24 @@
+use crate::permissions::FreeTokenError;
+use crate::received_reward_store::{
+    ReceivedRewardRecordStore, ReceivesRewardRecord, ReceivesRewardRecordState,
+};
+use crate::reward_store::{RewardCode, RewardPackage, RewardStore};
+use crate::service::CommonResult;
+use crate::TimeInNs;
 use candid::{CandidType, Deserialize, Nat, Principal};
 use getset::{Getters, Setters};
 use num_bigint::BigUint;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt::Display;
-use crate::permissions::MintError;
-use crate::received_reward_store::{ReceivedRewardRecordStore, ReceivesRewardRecord, ReceivesRewardRecordState};
-use crate::reward_store::{RewardCode, RewardPackage, RewardStore};
-use crate::service::CommonResult;
-use crate::TimeInNs;
 thread_local! {
     pub static STATE: State = State::default();
 }
-
 
 pub struct TransactionId(pub String);
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub struct User(pub Principal);
-
 
 impl From<Principal> for User {
     fn from(principal: Principal) -> Self {
@@ -32,7 +32,6 @@ impl From<User> for Principal {
     }
 }
 
-
 #[derive(Default)]
 pub struct State {
     pub(crate) received_reward_record_store: RefCell<ReceivedRewardRecordStore>,
@@ -40,13 +39,12 @@ pub struct State {
     pub(crate) reward_store: RefCell<RewardStore>,
 }
 
-
 impl State {
     pub fn is_able_receive(&self, user: &User, reward_code: &RewardCode) -> CommonResult<()> {
         let state = self;
         let reward_store = state.reward_store.borrow();
         if !reward_store.is_reward_available(reward_code) {
-            return Err(MintError::RewardCodeNotAvailable).into();
+            return Err(FreeTokenError::RewardCodeNotAvailable).into();
         }
         let unlimited_user_store = state.unlimited_user_store.borrow();
         let received_reward_record_store = state.received_reward_record_store.borrow();
@@ -55,22 +53,28 @@ impl State {
         }
 
         if !received_reward_record_store.is_received_state_all_completed(user, reward_code) {
-            return Err(MintError::RewardIncomplete).into();
+            return Err(FreeTokenError::RewardIncomplete).into();
         }
 
-        let is_exist = received_reward_record_store.is_received_reward_record_exist(user, reward_code);
+        let is_exist =
+            received_reward_record_store.is_received_reward_record_exist(user, reward_code);
         if is_exist {
-            return Err(MintError::RewardAlreadyReceived).into();
+            return Err(FreeTokenError::RewardAlreadyReceived).into();
         }
         Ok(())
     }
-    pub fn receive_reward(&self, user: &User, reward_code: &RewardCode, time: TimeInNs) -> CommonResult<ReceivesRewardRecord> {
+    pub fn receive_reward(
+        &self,
+        user: &User,
+        reward_code: &RewardCode,
+        time: TimeInNs,
+    ) -> CommonResult<ReceivesRewardRecord> {
         let state = self;
         let mut received_reward_record_store = state.received_reward_record_store.borrow_mut();
         let reward_store = state.reward_store.borrow();
-        let reward_package = reward_store.get_reward(reward_code);
+        let reward_package = reward_store.get_reward_package(reward_code);
         if reward_package.is_none() {
-            return Err(MintError::RewardCodeNotAvailable).into();
+            return Err(FreeTokenError::RewardCodeNotAvailable).into();
         }
 
         let mut reward_record_hash = HashMap::new();
@@ -79,12 +83,15 @@ impl State {
         }
 
         let reward_record = ReceivesRewardRecord::new(reward_record_hash, time);
-        received_reward_record_store.add_received_reward_record(user.clone(), reward_code.clone(), reward_record.clone());
+        received_reward_record_store.add_received_reward_record(
+            user.clone(),
+            reward_code.clone(),
+            reward_record.clone(),
+        );
         println!("receive_reward: {:?}", reward_record);
         Ok(reward_record)
     }
 }
-
 
 #[derive(Default)]
 pub struct UnlimitedUserStore {

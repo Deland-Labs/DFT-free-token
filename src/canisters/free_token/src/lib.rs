@@ -1,16 +1,16 @@
+use candid::{candid_method, CandidType, Deserialize, Principal};
 use std::fmt::Display;
 use std::ops::{Add, Sub};
-use candid::{candid_method, CandidType, Deserialize, Principal};
 
 mod actor;
 mod canister_api;
+mod constants;
 mod ic_logger;
 mod permissions;
+mod received_reward_store;
+mod reward_store;
 mod service;
 mod state;
-mod reward_store;
-mod received_reward_store;
-
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, CandidType, Deserialize, Copy, Ord, PartialOrd)]
 #[serde(transparent)]
