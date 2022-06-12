@@ -36,8 +36,8 @@ export interface _SERVICE {
     [string, Array<RewardType>, [] | [Array<Principal>]],
     BooleanResult,
   >,
-  'get_reward' : ActorMethod<[string], RewardPackageResult>,
-  'get_rewards' : ActorMethod<[], RewardPackagesResult>,
+  'get_reward_package' : ActorMethod<[string], RewardPackageResult>,
+  'get_reward_packages' : ActorMethod<[], RewardPackagesResult>,
   'history' : ActorMethod<[], HistoryResult>,
   'receive_free_token' : ActorMethod<[string], BooleanResult>,
 }

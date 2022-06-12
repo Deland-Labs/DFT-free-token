@@ -195,7 +195,7 @@ Then(/^check reward is available$/, async function (dataTable) {
     const target_table = dataTable.hashes();
 
     for (const target of target_table) {
-        const result = await actor.get_reward(target.reward);
+        const result = await actor.get_reward_package(target.reward);
         if ('Ok' in result) {
             logger.debug(JSON.stringify(result.Ok));
         } else {

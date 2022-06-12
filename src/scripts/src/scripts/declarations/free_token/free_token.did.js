@@ -43,8 +43,12 @@ export const idlFactory = ({ IDL }) => {
         [BooleanResult],
         [],
       ),
-    'get_reward' : IDL.Func([IDL.Text], [RewardPackageResult], ['query']),
-    'get_rewards' : IDL.Func([], [RewardPackagesResult], ['query']),
+    'get_reward_package' : IDL.Func(
+        [IDL.Text],
+        [RewardPackageResult],
+        ['query'],
+      ),
+    'get_reward_packages' : IDL.Func([], [RewardPackagesResult], ['query']),
     'history' : IDL.Func([], [HistoryResult], ['query']),
     'receive_free_token' : IDL.Func([IDL.Text], [BooleanResult], []),
   });

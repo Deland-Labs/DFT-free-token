@@ -26,8 +26,8 @@ type RewardType = variant {
 };
 service : () -> {
   add_reward : (text, vec RewardType, opt vec principal) -> (BooleanResult);
-  get_reward : (text) -> (RewardPackageResult) query;
-  get_rewards : () -> (RewardPackagesResult) query;
+  get_reward_package : (text) -> (RewardPackageResult) query;
+  get_reward_packages : () -> (RewardPackagesResult) query;
   history : () -> (HistoryResult) query;
   receive_free_token : (text) -> (BooleanResult);
 }
