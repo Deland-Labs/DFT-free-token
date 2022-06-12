@@ -40,7 +40,6 @@ Feature: FreeToken
       | icnaming_user1 |
       | icnaming_user2 |
 
-  @dev
   Scenario: FreeToken insufficient quota, should failed Reward incomplete
     When mintable "token_mintable" add minter "free_token"
     When add reward token
@@ -55,3 +54,26 @@ Feature: FreeToken
       | user           |
       | icnaming_user1 |
       | icnaming_user2 |
+
+  Scenario: FreeToken History
+    When mintable "token_mintable" add minter "free_token"
+    When add reward token
+      | code     | quota_canister | len | diff | dicp_canister | dicp_amount | mint_canister  | mint_amount | user          |
+      | reward_1 | registrar      | 4   | 5    | token_WICP    | 1000        | token_mintable | 1200        | icnaming_main |
+      | reward_2 | registrar      | 3   | 1    | token_WICP    | 1200        | token_mintable | 1100        | icnaming_main |
+    Then Users receive tokens for free code "reward_1"
+      | user           |
+      | icnaming_main  |
+      | icnaming_user1 |
+      | icnaming_user2 |
+    Then Users receive tokens for free code "reward_2"
+      | user           |
+      | icnaming_main  |
+      | icnaming_user1 |
+      | icnaming_user2 |
+    Then check user "icnaming_user1" reward history
+      | reward   |
+      | reward_1 |
+      | reward_2 |
+    Then check user
+

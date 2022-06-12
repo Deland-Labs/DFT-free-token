@@ -167,3 +167,9 @@ When(/^add reward token$/, async function (dataTable) {
         logger.debug(`add reward result: ${JSON.stringify(res)}`);
     }
 });
+Then(/^check user "([^"]*)" reward history$/, function (user, dataTable) {
+    const actor = createFreeTokenActor(user);
+    const target_table = dataTable.hashes();
+    const rewardHistory = actor.history;
+
+});
