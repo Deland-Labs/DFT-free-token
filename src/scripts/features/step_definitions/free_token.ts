@@ -74,9 +74,7 @@ Then(/^Users receive tokens for free code "([^"]*)"$/, async function (code, dat
     logger.debug(`target_table: ${JSON.stringify(target_table)}`);
     for (const target of target_table) {
         const actor = createFreeTokenActor(target.user);
-        const res = await actor!.receive_free_token({
-            'code': code
-        });
+        const res = await actor!.receive_free_token([code]);
         logger.debug(`freeToken result: ${JSON.stringify(res)}`);
 
         assert_remote_result(res);
@@ -194,7 +192,7 @@ Then(/^check reward is available$/, async function (dataTable) {
     const target_table = dataTable.hashes();
 
     for (const target of target_table) {
-        const result = await actor.get_reward(target.reward);
+        const result = await actor.get_reward([target.reward]);
         if ('Ok' in result) {
             logger.debug(JSON.stringify(result.Ok));
         } else {
