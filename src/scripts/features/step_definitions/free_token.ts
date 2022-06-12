@@ -165,6 +165,9 @@ When(/^add reward token$/, async function (dataTable) {
 
         const res = await actor!.add_reward(target.code, rewardList, [users]);
         logger.debug(`add reward result: ${JSON.stringify(res)}`);
+        if ('Err' in res) {
+            assert(false, `expect Ok, but got Err: ${res.Err.message}`);
+        }
     }
 });
 Then(/^check user "([^"]*)" reward history$/, async function (user, dataTable) {
