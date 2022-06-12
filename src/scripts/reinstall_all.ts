@@ -1,6 +1,6 @@
 import {reinstall_all} from "./src/tasks"
 import logger from "node-color-log";
-import { exec } from "child_process";
+import {exec} from "child_process";
 
 (async () => {
     exec("npx icdev install-canister")
@@ -14,6 +14,7 @@ import { exec } from "child_process";
             token_WUSD: {
                 reinstall: false,
             },
+            free_token: true,
         }
     });
 })().then(() => {
