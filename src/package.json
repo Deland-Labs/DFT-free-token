@@ -33,7 +33,7 @@
     "jake": "^10.8.4",
     "js-sha256": "^0.9.0",
     "mathjs": "^10.5.0",
-    "node-color-log": "^7.0.0",
+    "node-color-log": "^9.0.0",
     "node-fetch": "^2.6.7",
     "protobufjs": "^6.11.2",
     "secp256k1": "^4.0.2",
