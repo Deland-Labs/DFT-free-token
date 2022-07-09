@@ -12,7 +12,7 @@ jobs:
   create_dev_package:
     runs-on: ubuntu-latest
     container:
-      image: docker.io/kentsday/dfx_rust:bullseye-dfx-0.10.0-1
+      image: docker.io/kentsday/dfx_rust:bullseye-dfx-0.10.1-1
     steps:
       - uses: actions/checkout@v3
         with:
@@ -73,7 +73,7 @@ jobs:
   unit_test:
     runs-on: ubuntu-latest
     container:
-      image: docker.io/kentsday/dfx_rust:bullseye-dfx-0.10.0-1
+      image: docker.io/kentsday/dfx_rust:bullseye-dfx-0.10.1-1
     steps:
       - uses: actions/checkout@v3
         with:
@@ -104,7 +104,7 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     container:
-      image: docker.io/kentsday/dfx_rust:bullseye-dfx-0.10.0-1
+      image: docker.io/kentsday/dfx_rust:bullseye-dfx-0.10.1-1
     steps:
       - uses: actions/checkout@v3
         with:

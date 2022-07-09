@@ -11,7 +11,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: docker.io/kentsday/dfx_rust:bullseye-dfx-0.10.0-1
+      image: docker.io/kentsday/dfx_rust:bullseye-dfx-0.10.1-1
     steps:
       - uses: actions/checkout@v3
         with:
@@ -55,7 +55,7 @@ jobs:
           npm config set ${REGISTRY}:_authToken ${{ secrets.MY_GET_TOKEN }}
           npm config set @deland-labs:registry https:${REGISTRY}
         env:
-          REGISTRY: //www.myget.org/F/ic-feed/npm/
+          REGISTRY: //gitlab.com/api/v4/projects/37663507/packages/npm/
       - run: |
           cd $GITHUB_WORKSPACE/src
           Version=$(git describe --tags --abbrev=0)
